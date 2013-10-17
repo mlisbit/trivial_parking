@@ -64,49 +64,34 @@ class KioskMainFrame extends JFrame implements ActionListener {
 	}
 
 	public JPanel keyboardView() {
-		String firstRow[] = {"~","1","2","3","4","5","6","7","8","9","0","-","+","Back"};//BackSpace
-		String secondRow[] = {"Tab","Q","W","E","R","T","Y","U","I","O","P","[","]","\\"};
-		String thirdRow[] = {"Caps","A","S","D","F","G","H","J","K","L",":","\"","Enter"};
-		String fourthRow[] = {"Shift","Z","X","C","V","B","N","M",",",".","?","   ^" };
+		String firstRow[][] = {
+										{"~","1","2","3","4","5","6","7","8","9","0","Back"},
+		 								{"Tab","Q","W","E","R","T","Y","U","I","O","P","@"},
+										{"Caps","A","S","D","F","G","H","J","K","L","Enter"},
+										{"Shift","Z","X","C","V","B","N","M",",","."},
+										{"Space" },
+									};	
 
 		JPanel keyBoardPane = new JPanel();
 
 		keyBoardPane.setLayout(new GridLayout(5,1));
     	//pack the components
    	pack();
-		
-		JButton first[] = new JButton[firstRow.length];
-	   //get the panel for the  row
-	   JPanel p = new JPanel(new GridLayout(1, firstRow.length));
-	   for(int i = 0; i < firstRow.length; ++i) 
-	   {
-	   	JButton b;
-	   	b = createSimpleButton(firstRow[i]);
-			b.setPreferredSize(new Dimension(100,50));
-			b.setBorder(new LineBorder(mainBackground));
-			first[i] = b;
-			p.add(first[i]);
+		for (int r = 0 ; r < 5 ; r++) {
+			JButton row[] = new JButton[firstRow[r].length];
+		   JPanel p = new JPanel(new GridLayout(1, firstRow[r].length));
+		   for(int i = 0; i < firstRow[r].length; ++i) 
+		   {
+		   	JButton b;
+		   	b = createSimpleButton(firstRow[r][i]);
+				b.setPreferredSize(new Dimension(100,50));
+				b.setBorder(new LineBorder(mainBackground));
+				row[i] = b;
+				p.add(row[i]);
+			}
+			keyBoardPane.add(p);
 		}
-		keyBoardPane.add(p);
 		
-		JButton second[] = new JButton[secondRow.length];
-	   //get the panel for the  row
-	   p = new JPanel(new GridLayout(1, secondRow.length));
-	   for(int i = 0; i < secondRow.length; ++i) 
-	   {
-	   	JButton b;
-	   	b = createSimpleButton(secondRow[i]);
-			b.setPreferredSize(new Dimension(100,50));
-			b.setBorder(new LineBorder(mainBackground));
-			second[i] = b;
-			p.add(second[i]);
-		}
-		keyBoardPane.add(p);
-
-
-
-
-	   keyBoardPane.add(p);
 		keyBoardPane.setPreferredSize(new Dimension(0, 300));
 		keyBoardPane.setBackground(mainButtonColor);
 
