@@ -64,17 +64,53 @@ class KioskMainFrame extends JFrame implements ActionListener {
 	}
 
 	public JPanel keyboardView() {
-		String firstRow[] = {"~","1","2","3","4","5","6","7","8","9","0","-","+","<<<<<"};//BackSpace
+		String firstRow[] = {"~","1","2","3","4","5","6","7","8","9","0","-","+","Back"};//BackSpace
 		String secondRow[] = {"Tab","Q","W","E","R","T","Y","U","I","O","P","[","]","\\"};
 		String thirdRow[] = {"Caps","A","S","D","F","G","H","J","K","L",":","\"","Enter"};
 		String fourthRow[] = {"Shift","Z","X","C","V","B","N","M",",",".","?","   ^" };
-		JPanel keyboardPane = new JPanel();
 
-		keyboardPane.setLayout(new GridLayout(3,10));
-		keyboardPane.setPreferredSize(new Dimension(0, 300));
-		keyboardPane.setBackground(mainButtonColor);
+		JPanel keyBoardPane = new JPanel();
 
-      return keyboardPane;
+		keyBoardPane.setLayout(new GridLayout(5,1));
+    	//pack the components
+   	pack();
+		
+		JButton first[] = new JButton[firstRow.length];
+	   //get the panel for the  row
+	   JPanel p = new JPanel(new GridLayout(1, firstRow.length));
+	   for(int i = 0; i < firstRow.length; ++i) 
+	   {
+	   	JButton b;
+	   	b = createSimpleButton(firstRow[i]);
+			b.setPreferredSize(new Dimension(100,50));
+			b.setBorder(new LineBorder(mainBackground));
+			first[i] = b;
+			p.add(first[i]);
+		}
+		keyBoardPane.add(p);
+		
+		JButton second[] = new JButton[secondRow.length];
+	   //get the panel for the  row
+	   p = new JPanel(new GridLayout(1, secondRow.length));
+	   for(int i = 0; i < secondRow.length; ++i) 
+	   {
+	   	JButton b;
+	   	b = createSimpleButton(secondRow[i]);
+			b.setPreferredSize(new Dimension(100,50));
+			b.setBorder(new LineBorder(mainBackground));
+			second[i] = b;
+			p.add(second[i]);
+		}
+		keyBoardPane.add(p);
+
+
+
+
+	   keyBoardPane.add(p);
+		keyBoardPane.setPreferredSize(new Dimension(0, 300));
+		keyBoardPane.setBackground(mainButtonColor);
+
+      return keyBoardPane;
 	}
 
 	public JPanel mainCarProfileView() {
@@ -176,7 +212,7 @@ class KioskMainFrame extends JFrame implements ActionListener {
 	}
 	public KioskMainFrame() {
 		panel.setLayout(new BorderLayout(0, 0)); 
-		initLoginPage();
+		initCustomerInfoPage();
 		this.setContentPane(panel);
 	}
 }
