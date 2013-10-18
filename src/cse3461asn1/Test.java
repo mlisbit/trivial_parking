@@ -9,18 +9,10 @@ public class Test {
 		InsuranceDatabase idb = new InsuranceDatabase("companies.txt");
 		ParkingDatabase pdb = new ParkingDatabase("parking.txt");
 		
-		Student testS1 = sdb.getStudent(123456789);
-		
-		System.out.println(testS1);
-		
-		Parking testP1 = pdb.getParkingSpot("1a09");
-		
-		System.out.println(testP1);
-		
 		ArrayList<Insurance> companies = idb.getCompanies();
 		
-		for(int i = 0; i < companies.size(); i++) {
-			System.out.println(companies.get(i));
-		}
+		sdb.saveStudent(987612345, 2430, "Anderson", "Devon");
+		sdb.saveInsuranceCompany(987612345, companies.get(0).getName(), 99882211);
+		sdb.saveParkingSpot(987612345, "1a03", pdb);
 	}
 }
