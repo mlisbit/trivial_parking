@@ -12,4 +12,4 @@ public class Global {
 	public static Color mainButtonColor = new Color(46, 46, 46);
 	public static Color completed = new Color(66, 66, 66);
 
-}
+} 

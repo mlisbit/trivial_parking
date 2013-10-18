@@ -20,8 +20,6 @@ public class KioskMain {
 	}
 }
 
-
-
 class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 	// the following avoids a "warning" with Java 1.5.0 complier (?)
 	static final long serialVersionUID = 42L;
@@ -37,29 +35,6 @@ class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 		return i;
 	}
 
-	public JPanel mainPurchaseView() {
-		JPanel mainPane = new JPanel();
-		JPanel datePane = new JPanel();
-		datePane.setLayout(new GridLayout(1,6));
-		String[] months = {"Jan", "Feb", "March", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"};
-		String[] years = {"2013", "2014", "2015"};
-
-		JComboBox monthList = new JComboBox(months);
-		JComboBox yearList = new JComboBox(years);
-		JComboBox dayList = new JComboBox(getDaysInMonth(0));
-
-		monthList.setSelectedIndex(9);
-		dayList.setSelectedIndex(9);
-		yearList.setSelectedIndex(2);
-
-		datePane.add(monthList);
-		datePane.add(dayList);
-		datePane.add(yearList);
-
-		mainPane.add(datePane);
-
-		return mainPane;
-	}
 
 public JPanel keyboardView() {
 		String firstRow[][] = {
@@ -121,6 +96,7 @@ public JPanel sidePanelView() {
 		sidePane.add(b2);
 		sidePane.add(b3);
 		sidePane.add(b4);
+
       sidePane.setBackground(Global.mainBackground);
       sidePane.setBorder( new EmptyBorder( 5, 0, 5, 5 ) );
       return sidePane;
@@ -135,6 +111,16 @@ public JPanel sidePanelView() {
 	  Border compound = new CompoundBorder(line, margin);
 	  button.setBorder(margin);
 	  return button;
+	}
+
+	public static JComboBox createSimpleGroupBox(String[] options) {
+		JComboBox boxy = new JComboBox(options);
+		boxy.setForeground(Color.BLACK);
+	  	boxy.setBackground(Color.WHITE);
+	  	boxy.setBorder(BorderFactory.createLineBorder(Global.mainBackground));
+	  	boxy.setFont(Global.formFont);
+	  	
+	  	return boxy;
 	}
 
 	public JPanel mainCarProfileView() {
@@ -164,7 +150,7 @@ public JPanel sidePanelView() {
 	public void actionPerformed(ActionEvent e) {
 		System.out.println(e.getActionCommand());
 		if (e.getActionCommand() == "login_authenticate") {
-			initCustomerInfoPage();
+			initPurchaseView();
 		}
 		else if (e.getActionCommand() == "Car_Information") {
 			initCarInfoPage();
@@ -176,9 +162,12 @@ public JPanel sidePanelView() {
 			initChoosePassPage();
 		}
 		else if (e.getActionCommand() == "new_client") {
-			initPurchaseView();
+			initCustomerInfoPage();
 		}
 		else if (e.getActionCommand() == "complete") {
+			initLoginPage();
+		}
+		else if (e.getActionCommand() == "Cancel") {
 			initLoginPage();
 		}
 		else {
@@ -298,7 +287,104 @@ public JPanel sidePanelView() {
 		return mainPane;
 	}
 
-	public JPanel choosePasswordPage() {
+	//date picking buttons yo
+	public JPanel mainPurchaseDateView() {
+		JPanel mainPane = new JPanel();
+		JPanel datePane = new JPanel();
+		datePane.setLayout(new GridLayout(1,6));
+		String[] months = {"Jan", "Feb", "March", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"};
+		String[] years = {"2013", "2014", "2015"};
+		mainPane.setBackground(Global.mainBackground);
+		JComboBox monthList;
+		JComboBox yearList;
+		JComboBox dayList;
+
+		JLabel label = new JLabel("Till what day? : ");
+		label.setFont(Global.formFont);
+		mainPane.add(label);
+		monthList = createSimpleGroupBox(months);
+		yearList = createSimpleGroupBox(years);
+		dayList = createSimpleGroupBox(getDaysInMonth(0));
+		monthList.setSelectedIndex(9);
+		dayList.setSelectedIndex(9);
+		yearList.setSelectedIndex(2);
+
+		datePane.add(monthList);
+		datePane.add(dayList);
+		datePane.add(yearList);
+		mainPane.add(datePane);
+
+		return mainPane;
+	}
+
+	public JPanel mainPurchaseTimeView() {
+		JPanel mainPane = new JPanel();
+
+		JPanel timePane = new JPanel();
+		timePane.setLayout(new GridLayout(1,6));
+		String[] hours = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
+		String[] minutes = {"00", "15", "30", "45"};
+		String[] ampm = {"AM", "PM"};
+
+		mainPane.setBackground(Global.mainBackground);
+		JComboBox hourList;
+		JComboBox minuteList;
+		JComboBox ampmList;
+
+		JLabel label = new JLabel("Till what time? : ");
+		label.setFont(Global.formFont);
+		mainPane.add(label);
+
+		hourList = createSimpleGroupBox(hours);
+		minuteList = createSimpleGroupBox(minutes);
+		ampmList = createSimpleGroupBox(ampm);
+		/*
+		hourList.setSelectedIndex();
+		minuteList.setSelectedIndex();
+		ampmList.setSelectedIndex();
+		*/
+		timePane.add(hourList);
+		timePane.add(minuteList);
+		timePane.add(ampmList);
+		mainPane.add(timePane);
+		return mainPane;
+	}
+
+	public JPanel mainPurchasebuttons() {
+		JPanel buttonHolders =  new JPanel();
+		buttonHolders.setLayout(new GridLayout(1,2));
+		buttonHolders.setBackground(Global.mainBackground);
+
+		JButton login = createSimpleButton("Purchase");
+		JButton newClient = createSimpleButton("Cancel");
+		
+		login.setActionCommand("Purchase");
+		newClient.setActionCommand("Cancel");
+
+		login.addActionListener(this);	
+		newClient.addActionListener(this);	
+
+		login.setBackground(new Color (34, 139, 34));
+		buttonHolders.add(newClient);
+		buttonHolders.add(login);
+		
+		return buttonHolders;
+	}
+	public JPanel mainPurchaseView() {
+		JPanel mainPane = new JPanel();
+		mainPane.setBackground(Global.mainBackground);
+		
+		mainPane.add(mainPurchaseDateView());
+		mainPane.add(mainPurchaseTimeView());
+		mainPane.add(new JLabel("Parking Rate 25cents / hour:", JLabel.CENTER));
+		mainPane.add(mainPurchasebuttons());
+
+		mainPane.setLayout(new GridLayout(10,1));
+
+		return mainPane;
+	}
+
+	public JPanel choosePasswordView() {
 		JPanel mainPane = new JPanel();
 
 		JTextField firstPassField = new JTextField("",20);
@@ -320,6 +406,7 @@ public JPanel sidePanelView() {
       mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
 		return mainPane;
 	}
+
 	public void initCarInfoPage() {
 		panel.removeAll();
 		panel.add(carInfoView(), "Center");
@@ -329,7 +416,7 @@ public JPanel sidePanelView() {
 
 	public void initChoosePassPage() {
 		panel.removeAll();
-		panel.add(choosePasswordPage(), "Center");
+		panel.add(choosePasswordView(), "Center");
 		panel.add(keyboardView(), "South");
 		panel.add(sidePanelView(), "East");
 	}
@@ -353,7 +440,6 @@ public JPanel sidePanelView() {
 		panel.add(keyboardView(), "South");
 	}
 
-
 	public KioskMainFrame() {
 		panel.setLayout(new BorderLayout(0, 0)); 
 		panel.setPreferredSize(new Dimension(1000, 800));
@@ -361,3 +447,4 @@ public JPanel sidePanelView() {
 		this.setContentPane(panel);
 	}
 }
+
