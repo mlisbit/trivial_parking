@@ -3,6 +3,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.KeyboardFocusManager;
+import java.util.ArrayList;
 
 public class KioskMain {
 	public static void main(String[] args) {
@@ -19,62 +20,45 @@ public class KioskMain {
 	}
 }
 
-class Global {
 
-}
 
 class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 	// the following avoids a "warning" with Java 1.5.0 complier (?)
 	static final long serialVersionUID = 42L;
 
 	JPanel panel = new JPanel();
-	Font formFont = new Font("Book Antiqua", Font.PLAIN, 28);
 
-	
-	static Color mainBackground = new Color(198, 226, 255);
-	static Color mainButtonColor = new Color(46, 46, 46);
-	static Color completed = new Color(66, 66, 66);
+	public String[] getDaysInMonth(int month) {
+		String[] i = new String[31];
+		for (int k = 1 ; k <= 31 ; k++) {
+			i[k-1] = String.valueOf(k);
+		}
 
-	JTextField selectedTextField = new JTextField("",20);
+		return i;
+	}
 
-	public JPanel mainLoginView() {
+	public JPanel mainPurchaseView() {
 		JPanel mainPane = new JPanel();
-		
-		JTextField emailField = new JTextField("",20);
-		JTextField passwordField = new JTextField("",20);
-		//styling of the input form
-		emailField.setFont(formFont);
-		passwordField.setFont(formFont);
+		JPanel datePane = new JPanel();
+		datePane.setLayout(new GridLayout(1,6));
+		String[] months = {"Jan", "Feb", "March", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"};
+		String[] years = {"2013", "2014", "2015"};
 
-		JLabel welcomeBanner = new JLabel("Welcome", JLabel.CENTER);
-		mainPane.add(welcomeBanner);
-		mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-		//adding the componenets
-		mainPane.add(new JLabel("Email Address:", JLabel.CENTER));
-      mainPane.add(emailField);
-      mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-      mainPane.add(new JLabel("Password:", JLabel.CENTER));
-      mainPane.add(passwordField);
-      mainPane.add(Box.createVerticalStrut(5)); // a spacer
-    	mainPane.add(loginButtonView());
+		JComboBox monthList = new JComboBox(months);
+		JComboBox yearList = new JComboBox(years);
+		JComboBox dayList = new JComboBox(getDaysInMonth(0));
 
-      mainPane.setLayout(new GridLayout(10,1));
-      mainPane.setBackground(mainBackground);
-      mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ));
-      return mainPane;
-	}
+		monthList.setSelectedIndex(9);
+		dayList.setSelectedIndex(9);
+		yearList.setSelectedIndex(2);
 
-public void initLoginPage() {
-		panel.removeAll();
-		panel.add(mainLoginView(), "Center");
-		panel.add(keyboardView(), "South");
-	}
+		datePane.add(monthList);
+		datePane.add(dayList);
+		datePane.add(yearList);
 
-public void initCustomerInfoPage() {
-		panel.removeAll();
-		panel.add(mainStudentProfileView(), "Center");
-		panel.add(keyboardView(), "South");
-		panel.add(sidePanelView(), "East");
+		mainPane.add(datePane);
+
+		return mainPane;
 	}
 
 public JPanel keyboardView() {
@@ -100,7 +84,7 @@ public JPanel keyboardView() {
 		   	b = createSimpleButton(firstRow[r][i]);
 		   	b.addActionListener(this);	
 				b.setPreferredSize(new Dimension(100,50));
-				b.setBorder(new LineBorder(mainBackground));
+				b.setBorder(new LineBorder(Global.mainBackground));
 				row[i] = b;
 				p.add(row[i]);
 			}
@@ -108,31 +92,44 @@ public JPanel keyboardView() {
 		}
 
 		keyBoardPane.setPreferredSize(new Dimension(0, 300));
-		keyBoardPane.setBackground(mainButtonColor);
+		keyBoardPane.setBackground(Global.mainButtonColor);
 
       return keyBoardPane;
 	}
 
 public JPanel sidePanelView() {
 		JButton b1, b2, b3, b4; 
-		b1 = createSimpleButton("Student Information");
-		b2 = createSimpleButton("Car Information");
-		b3 = createSimpleButton("Addictional Information");
-		b4 = createSimpleButton("Complete");
 		JPanel sidePane = new JPanel();
 		sidePane.setLayout(new GridLayout(4,1, 5, 5));
+
+		b1 = createSimpleButton("Student Information");
+		b2 = createSimpleButton("Car Information");
+		b3 = createSimpleButton("Choose Password");
+		b4 = createSimpleButton("Complete");
+
+		b1.setActionCommand("Student_Information");
+		b2.setActionCommand("Car_Information");
+		b3.setActionCommand("Choose_Password");
+		b4.setActionCommand("complete");
+
+		b1.addActionListener(this);	
+		b2.addActionListener(this);	
+		b3.addActionListener(this);	
+		b4.addActionListener(this);	
+
 		sidePane.add(b1);
 		sidePane.add(b2);
 		sidePane.add(b3);
 		sidePane.add(b4);
-      sidePane.setBackground(mainBackground);
+      sidePane.setBackground(Global.mainBackground);
       sidePane.setBorder( new EmptyBorder( 5, 0, 5, 5 ) );
       return sidePane;
 	}
-	private static JButton createSimpleButton(String text) {
+
+	public static JButton createSimpleButton(String text) {
 	  JButton button = new JButton(text);
 	  button.setForeground(Color.WHITE);
-	  button.setBackground(mainButtonColor);
+	  button.setBackground(Global.mainButtonColor);
 	  Border line = new LineBorder(Color.BLACK);
 	  Border margin = new EmptyBorder(5, 15, 5, 15);
 	  Border compound = new CompoundBorder(line, margin);
@@ -147,20 +144,71 @@ public JPanel sidePanelView() {
 
 		return null;
 	}
+	
+	public void mousePressed(MouseEvent e)
+	  {
+		  	//rememebrs the last textfield that was pressed.
+	  		//prevents loosing focus while typing.
+		   if (e.getSource() instanceof JTextField) {
+		   	Global.selectedTextField = (JTextField)(e.getSource());
+		   	System.out.println("boom");
+		   }
+	  }
+	  public void mouseClicked(MouseEvent e){}
+	  public void mouseEntered(MouseEvent e){}
+	  public void mouseExited(MouseEvent e){} 
+	  public void mouseReleased(MouseEvent e){
+	  }
+	 
 
+	public void actionPerformed(ActionEvent e) {
+		System.out.println(e.getActionCommand());
+		if (e.getActionCommand() == "login_authenticate") {
+			initCustomerInfoPage();
+		}
+		else if (e.getActionCommand() == "Car_Information") {
+			initCarInfoPage();
+		}
+		else if (e.getActionCommand() == "Student_Information") {
+			initCustomerInfoPage();
+		}
+		else if (e.getActionCommand() == "Choose_Password") {
+			initChoosePassPage();
+		}
+		else if (e.getActionCommand() == "new_client") {
+			initPurchaseView();
+		}
+		else if (e.getActionCommand() == "complete") {
+			initLoginPage();
+		}
+		else {
+			switch(e.getActionCommand()) {
+				case 	"Space": 	Global.selectedTextField.setText(Global.selectedTextField.getText() + " ");
+										break;
+				case	"Back":		if (Global.selectedTextField.getText().length() > 0) {
+    										Global.selectedTextField.setText(Global.selectedTextField.getText().substring(0, Global.selectedTextField.getText().length()-1));
+  										}
+  										break;
+				default:				Global.selectedTextField.setText(Global.selectedTextField.getText() + e.getActionCommand());
+										break;
+			}
+		}
+		this.setContentPane(panel);
+	}
+	
 	public JPanel mainStudentProfileView() {
 		JPanel mainPane = new JPanel();
 
 		JTextField firstNameField = new JTextField("",20);
 		JTextField lastNameField = new JTextField("",20);
-		JTextField emailField = new JTextField("",20);
+		JTextField studentNumberField = new JTextField("",20);
 
-		firstNameField.setFont(formFont);
+		firstNameField.setFont(Global.formFont);
 		firstNameField.addMouseListener(this);
-		lastNameField.setFont(formFont);
+		lastNameField.setFont(Global.formFont);
 		lastNameField.addMouseListener(this);
-		emailField.setFont(formFont);
-		emailField.addMouseListener(this);
+		studentNumberField.setFont(Global.formFont);
+		studentNumberField.addMouseListener(this);
 
 		mainPane.add(new JLabel("First Name:", JLabel.CENTER));
       mainPane.add(firstNameField);
@@ -168,29 +216,57 @@ public JPanel sidePanelView() {
       mainPane.add(new JLabel("Last Name:", JLabel.CENTER));
       mainPane.add(lastNameField);
       mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-		mainPane.add(new JLabel("email:", JLabel.CENTER));
-      mainPane.add(emailField);      
+		mainPane.add(new JLabel("Student Number:", JLabel.CENTER));
+      mainPane.add(studentNumberField);      
 
       mainPane.setLayout(new GridLayout(10,1));
-      mainPane.setBackground(mainBackground);
+      mainPane.setBackground(Global.mainBackground);
       mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
-
 		return mainPane;
 	}
 
-	
-	
-	public void initAdditionInfoPage() {}
-	public void initCarInfoPage() {}
+	public JPanel mainLoginView() {
+		JPanel mainPane = new JPanel();
+		JTextField emailField = new JTextField("",20);
+		JTextField passwordField = new JTextField("",20);
+		//styling of the input form
+		emailField.setFont(Global.formFont);
+		passwordField.setFont(Global.formFont);
+		emailField.addMouseListener(this);
+		passwordField.addMouseListener(this);
 
+		JLabel welcomeBanner = new JLabel("Welcome", JLabel.CENTER);
+		mainPane.add(welcomeBanner);
+		mainPane.add(Box.createHorizontalStrut(15)); // a spacer
+		//adding the componenets
+		mainPane.add(new JLabel("Email Address:", JLabel.CENTER));
+      mainPane.add(emailField);
+      mainPane.add(Box.createHorizontalStrut(15)); // a spacer
+      mainPane.add(new JLabel("Password:", JLabel.CENTER));
+      mainPane.add(passwordField);
+      mainPane.add(Box.createVerticalStrut(5)); // a spacer
+    	mainPane.add(loginButtonView());
+
+      mainPane.setLayout(new GridLayout(10,1));
+      mainPane.setBackground(Global.mainBackground);
+      mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ));
+      return mainPane;
+	}
+
+	//sets up the buttons on the main page
 	public JPanel loginButtonView() {
 		JPanel buttonHolders =  new JPanel();
 		buttonHolders.setLayout(new BorderLayout(0,0));
-		buttonHolders.setBackground(mainBackground);
+		buttonHolders.setBackground(Global.mainBackground);
+
 		JButton login = createSimpleButton("Login");
-		login.addActionListener(this);	
-		login.setActionCommand("login_authenticate");
 		JButton newClient = createSimpleButton("New Client");
+		
+		login.setActionCommand("login_authenticate");
+		newClient.setActionCommand("new_client");
+
+		login.addActionListener(this);	
+		newClient.addActionListener(this);	
 
 		login.setBackground(new Color (34, 139, 34));
 		buttonHolders.add(newClient, "West");
@@ -199,40 +275,89 @@ public JPanel sidePanelView() {
 		return buttonHolders;
 	}
 
-	
-	  public void mousePressed(MouseEvent e)
-	  {
-		   //System.out.println(e.toString());
-		   if (e.getSource() instanceof JTextField) {
-		   	selectedTextField = (JTextField)(e.getSource());
-		   	System.out.println("boom");
-		   }
-	  }
-	  public void mouseClicked(MouseEvent e){}
-	  public void mouseEntered(MouseEvent e){}
-	  public void mouseExited(MouseEvent e){}
-	  public void mouseReleased(MouseEvent e){
-	  }
-	 
+	public JPanel carInfoView() {
+		JPanel mainPane = new JPanel();
 
-	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand() == "login_authenticate") {
-			initCustomerInfoPage();
-		}
-		else {
-			//System.out.println(e.getActionCommand());
-			//System.out.println(selectedTextField.getText());
-			selectedTextField.setText(selectedTextField.getText() + e.getActionCommand());
-		}
-		//System.out.println(e);
-		this.setContentPane(panel);
+		JTextField carModelField = new JTextField("",20);
+		JTextField licensePlateField = new JTextField("",20);
+
+		carModelField.setFont(Global.formFont);
+		carModelField.addMouseListener(this);
+		licensePlateField.setFont(Global.formFont);
+		licensePlateField.addMouseListener(this);
+
+		mainPane.add(new JLabel("License Plate Number:", JLabel.CENTER));
+      mainPane.add(licensePlateField);
+      mainPane.add(Box.createHorizontalStrut(15)); // a spacer
+      mainPane.add(new JLabel("Car Model:", JLabel.CENTER));
+      mainPane.add(carModelField);
+
+      mainPane.setLayout(new GridLayout(10,1));
+      mainPane.setBackground(Global.mainBackground);
+      mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
+		return mainPane;
 	}
+
+	public JPanel choosePasswordPage() {
+		JPanel mainPane = new JPanel();
+
+		JTextField firstPassField = new JTextField("",20);
+		JTextField secondPassField = new JTextField("",20);
+
+		firstPassField.setFont(Global.formFont);
+		firstPassField.addMouseListener(this);
+		secondPassField.setFont(Global.formFont);
+		secondPassField.addMouseListener(this);
+
+		mainPane.add(new JLabel("Enter Desired Password:", JLabel.CENTER));
+      mainPane.add(firstPassField);
+      mainPane.add(Box.createHorizontalStrut(15)); // a spacer
+      mainPane.add(new JLabel("Confirm Password", JLabel.CENTER));
+      mainPane.add(secondPassField);
+
+      mainPane.setLayout(new GridLayout(10,1));
+      mainPane.setBackground(Global.mainBackground);
+      mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
+		return mainPane;
+	}
+	public void initCarInfoPage() {
+		panel.removeAll();
+		panel.add(carInfoView(), "Center");
+		panel.add(keyboardView(), "South");
+		panel.add(sidePanelView(), "East");
+	}
+
+	public void initChoosePassPage() {
+		panel.removeAll();
+		panel.add(choosePasswordPage(), "Center");
+		panel.add(keyboardView(), "South");
+		panel.add(sidePanelView(), "East");
+	}
+
+	public void initLoginPage() {
+		panel.removeAll();
+		panel.add(mainLoginView(), "Center");
+		panel.add(keyboardView(), "South");
+	}
+
+	public void initCustomerInfoPage() {
+		panel.removeAll();
+		panel.add(mainStudentProfileView(), "Center");
+		panel.add(keyboardView(), "South");
+		panel.add(sidePanelView(), "East");
+	}
+
+	public void initPurchaseView() {
+		panel.removeAll();
+		panel.add(mainPurchaseView(), "Center");
+		panel.add(keyboardView(), "South");
+	}
+
 
 	public KioskMainFrame() {
 		panel.setLayout(new BorderLayout(0, 0)); 
-		initCustomerInfoPage();
-		
+		panel.setPreferredSize(new Dimension(1000, 800));
+		initLoginPage();
 		this.setContentPane(panel);
-
 	}
 }
