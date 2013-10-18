@@ -1,5 +1,6 @@
 package cse3461asn1;
 
+//represents a parking spot, with a spot number and it's current status (reserved or open)
 public class Parking {
 	
 	private String spot;
@@ -26,7 +27,8 @@ public class Parking {
 		return false;
 	}
 	
+	//toString() method is also used in building records
 	public String toString() {
-		return "number: " + this.spot + "\nstatus: " + this.status;
+		return this.spot + "," + this.status;
 	}
 }

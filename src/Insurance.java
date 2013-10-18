@@ -1,5 +1,6 @@
 package cse3461asn1;
 
+//represents and insurance company
 public class Insurance {
 	
 	private String name;
@@ -21,6 +22,6 @@ public class Insurance {
 	}
 	
 	public String toString() {
-		return "name: " + this.name;
+		return this.name;
 	}
 }

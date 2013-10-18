@@ -1,12 +1,12 @@
 1a01,open
 1a02,open
-1a03,open
+1a03,reserved
 1a04,reserved
 1a05,open
 1a06,open
 1a07,open
 1a08,open
-1a09,reserved
+1a09,open
 1a10,open
 1b01,open
 1b02,reserved
@@ -44,6 +44,10 @@
 2b04,open
 2b05,open
 2b06,reserved
+2b07,open
+2b08,open
+2b09,reserved
+2b10,open
 2b07,open
 2b08,open
 2b09,reserved

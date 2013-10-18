@@ -1,5 +1,6 @@
 package cse3461asn1;
 
+//represents a student and it's current state.
 public class Student {
 	private int studentNumber;
 	private int pinNumber;
@@ -84,6 +85,13 @@ public class Student {
 	}
 	
 	public String toString() {
-		return "name: " + this.getFullName() + "\nstudent #: " + this.getStudentNumber() + "\npin #: " + this.getPinNumber() + "\nstatus: " + this.getStatus() + "\ninsurance company: " + this.getInsuranceCompany() + "\ninsurance policy: " + this.getParkingSpot();
+		String student = this.getStudentNumber() + "," + this.getPinNumber() + "," + this.getLastName() + "," + this.getFirstName() + "," + this.getStatus();
+		
+		if(this.policy > 0)
+			student += "," + this.company + "," + this.policy;
+		if(this.spot != "")
+			student += "," + this.spot;
+		
+		return student;
 	}
 }
