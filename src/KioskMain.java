@@ -269,7 +269,7 @@ public JPanel sidePanelView() {
 				
 		}
 		else if (e.getActionCommand() == "purchase") { 
-			//this is where you call the receipt.
+			//this is where you validate and call the receipt.
 		}
 		//final button on new client form
 		else if (e.getActionCommand() == "complete") {
