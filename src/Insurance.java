@@ -1,5 +1,3 @@
-package cse3461asn1;
-
 //represents and insurance company
 public class Insurance {
 	

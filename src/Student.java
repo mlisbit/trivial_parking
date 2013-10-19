@@ -1,4 +1,3 @@
-package cse3461asn1;
 
 //represents a student and it's current state.
 public class Student {

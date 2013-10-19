@@ -1,5 +1,3 @@
-package cse3461asn1;
-
 //represents a parking spot, with a spot number and it's current status (reserved or open)
 public class Parking {
 	

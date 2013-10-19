@@ -7,6 +7,9 @@ import java.util.ArrayList;
 
 public class Global {
 	public static Font formFont = new Font("Book Antiqua", Font.PLAIN, 28);
+	public static Font buttonFont = new Font("Book Antiqua", Font.PLAIN, 20);
+	public static Font labelFont = new Font("Book Antiqua", Font.PLAIN, 20);
+	public static Font titleFont = new Font("Book Antiqua", Font.PLAIN, 20);
 	public static JTextField selectedTextField = new JTextField("",20);
 	public static Color mainBackground = new Color(198, 226, 255);
 	public static Color mainButtonColor = new Color(46, 46, 46);

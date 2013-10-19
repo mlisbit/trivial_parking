@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.KeyboardFocusManager;
 import java.util.ArrayList;
+import java.io.IOException;
 
 public class KioskMain {
 	public static void main(String[] args) {
@@ -25,6 +26,9 @@ class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 	static final long serialVersionUID = 42L;
 
 	JPanel panel = new JPanel();
+	StudentDatabase sdb;
+	InsuranceDatabase idb;
+	ParkingDatabase pdb;
 
 	public String[] getDaysInMonth(int month) {
 		String[] i = new String[31];
@@ -35,8 +39,7 @@ class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 		return i;
 	}
 
-
-public JPanel keyboardView() {
+	public JPanel keyboardView() {
 		String firstRow[][] = {
 										{"~","1","2","3","4","5","6","7","8","9","0","Back"},
 		 								{"Tab","Q","W","E","R","T","Y","U","I","O","P","@"},
@@ -146,11 +149,46 @@ public JPanel sidePanelView() {
 	  public void mouseReleased(MouseEvent e){
 	  }
 	 
+	 //recursively find the compent in panel.
+	public static ArrayList getAllComponents(final Container c) {
+	    Component[] comps = c.getComponents();
+	    ArrayList compList = new ArrayList<Component>();
+	    ArrayList objectList = new ArrayList<JTextField>();
+	    for (Component comp : comps) {
+	        compList.add(comp);
+	        if (comp instanceof Container)
+	        		for (Component k : ((Container)comp).getComponents()) {
+	        			if (k instanceof JTextField) {
+	        				JTextField textField = (JTextField)k;
+	        				objectList.add(textField);
+	        				//System.out.println(textField.getName());
+	        			}
+	        		}    
+	            compList.addAll(getAllComponents((Container)comp));
+
+	    }
+	   	 return objectList;
+		}
+
+
 
 	public void actionPerformed(ActionEvent e) {
 		System.out.println(e.getActionCommand());
 		if (e.getActionCommand() == "login_authenticate") {
-			initPurchaseView();
+			try {
+			ArrayList<JTextField> fields = getAllComponents(this.panel);
+
+			String studentnumber = fields.get(0).getText();
+			String password = fields.get(1).getText();
+
+			if (sdb.authorizeStudent(Integer.parseInt(studentnumber), Integer.parseInt(password))) {
+				initPurchaseView();
+			}
+		} catch (Exception exception) {
+
+		}
+
+			
 		}
 		else if (e.getActionCommand() == "Car_Information") {
 			initCarInfoPage();
@@ -169,6 +207,9 @@ public JPanel sidePanelView() {
 		}
 		else if (e.getActionCommand() == "Cancel") {
 			initLoginPage();
+		}
+		else if (e.getActionCommand() == "Purchase") {
+			initConfirmationView();
 		}
 		else {
 			switch(e.getActionCommand()) {
@@ -216,29 +257,43 @@ public JPanel sidePanelView() {
 
 	public JPanel mainLoginView() {
 		JPanel mainPane = new JPanel();
-		JTextField emailField = new JTextField("",20);
+		JTextField studentNumberField = new JTextField("",20);
 		JTextField passwordField = new JTextField("",20);
 		//styling of the input form
-		emailField.setFont(Global.formFont);
+		studentNumberField.setFont(Global.formFont);
 		passwordField.setFont(Global.formFont);
-		emailField.addMouseListener(this);
+		studentNumberField.addMouseListener(this);
 		passwordField.addMouseListener(this);
 
 		JLabel welcomeBanner = new JLabel("Welcome", JLabel.CENTER);
+		JLabel studentNumberLabel = new JLabel("Student Number:", JLabel.CENTER);
+		JLabel passwordLabel = new JLabel("Password:", JLabel.CENTER);
+
+		welcomeBanner.setFont(Global.titleFont);
+		studentNumberLabel.setFont(Global.labelFont);
+		passwordLabel.setFont(Global.labelFont);
+
 		mainPane.add(welcomeBanner);
 		mainPane.add(Box.createHorizontalStrut(15)); // a spacer
 		//adding the componenets
-		mainPane.add(new JLabel("Email Address:", JLabel.CENTER));
-      mainPane.add(emailField);
+
+		mainPane.add(studentNumberLabel);
+      mainPane.add(studentNumberField);
+
       mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-      mainPane.add(new JLabel("Password:", JLabel.CENTER));
+
+      mainPane.add(passwordLabel);
       mainPane.add(passwordField);
+
       mainPane.add(Box.createVerticalStrut(5)); // a spacer
+
     	mainPane.add(loginButtonView());
 
       mainPane.setLayout(new GridLayout(10,1));
       mainPane.setBackground(Global.mainBackground);
       mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ));
+
+      //studentNumberField.getText();
       return mainPane;
 	}
 
@@ -251,6 +306,9 @@ public JPanel sidePanelView() {
 		JButton login = createSimpleButton("Login");
 		JButton newClient = createSimpleButton("New Client");
 		
+		login.setFont(Global.buttonFont);
+		newClient.setFont(Global.buttonFont);
+
 		login.setActionCommand("login_authenticate");
 		newClient.setActionCommand("new_client");
 
@@ -352,7 +410,6 @@ public JPanel sidePanelView() {
 
 	public JPanel mainPurchasebuttons() {
 		JPanel buttonHolders =  new JPanel();
-		buttonHolders.setLayout(new GridLayout(1,2));
 		buttonHolders.setBackground(Global.mainBackground);
 
 		JButton login = createSimpleButton("Purchase");
@@ -360,6 +417,12 @@ public JPanel sidePanelView() {
 		
 		login.setActionCommand("Purchase");
 		newClient.setActionCommand("Cancel");
+
+
+		login.setFont(Global.buttonFont);
+		newClient.setFont(Global.buttonFont);
+		login.setBorder( new EmptyBorder( 10, 10, 10, 10 ) );
+		newClient.setBorder( new EmptyBorder( 10, 10, 10, 10 ) );
 
 		login.addActionListener(this);	
 		newClient.addActionListener(this);	
@@ -370,6 +433,7 @@ public JPanel sidePanelView() {
 		
 		return buttonHolders;
 	}
+
 	public JPanel mainPurchaseView() {
 		JPanel mainPane = new JPanel();
 		mainPane.setBackground(Global.mainBackground);
@@ -378,9 +442,7 @@ public JPanel sidePanelView() {
 		mainPane.add(mainPurchaseTimeView());
 		mainPane.add(new JLabel("Parking Rate 25cents / hour:", JLabel.CENTER));
 		mainPane.add(mainPurchasebuttons());
-
 		mainPane.setLayout(new GridLayout(10,1));
-
 		return mainPane;
 	}
 
@@ -407,6 +469,11 @@ public JPanel sidePanelView() {
 		return mainPane;
 	}
 
+	public JPanel mainConfirmationView() {
+		JPanel mainPane = new JPanel();
+		mainPane.add(new JLabel("do you accept these charges?", JLabel.CENTER));
+		return mainPane;
+	}
 	public void initCarInfoPage() {
 		panel.removeAll();
 		panel.add(carInfoView(), "Center");
@@ -440,7 +507,20 @@ public JPanel sidePanelView() {
 		panel.add(keyboardView(), "South");
 	}
 
+	public void initConfirmationView() {
+		panel.removeAll();
+		panel.add(mainConfirmationView(), "Center");
+	}
+
+
 	public KioskMainFrame() {
+		try {
+			sdb = new StudentDatabase("students.txt");
+			idb = new InsuranceDatabase("companies.txt");
+			pdb = new ParkingDatabase("parking.txt");
+		}catch(IOException e){
+  			System.out.println("error loading db files. please make sure they are in the same directory");
+		}
 		panel.setLayout(new BorderLayout(0, 0)); 
 		panel.setPreferredSize(new Dimension(1000, 800));
 		initLoginPage();
