@@ -5,23 +5,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.text.*;
 
-public class Reciept {
-    
-    public static void main(String[] args) {
-
-        boolean accepted = false;
-        RecieptFrame frame = new RecieptFrame(accepted);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setTitle("Parking Kiosk Reciept");
-		frame.setPreferredSize(new Dimension(800, 400));
-		frame.setMinimumSize(new Dimension(800, 400));
-		frame.pack();
-		frame.setVisible(true);
-    }
-
-}
-
-class RecieptFrame extends JFrame implements ActionListener {
+public class RecieptFrame extends JFrame implements ActionListener {
     private boolean ok;
 
     private String firstName;
@@ -35,9 +19,14 @@ class RecieptFrame extends JFrame implements ActionListener {
     private int style;
     private Font font;
 
-    public RecieptFrame(boolean isAccepted) {
+    /* Pass in a student object and value that determines */
+    /* whether they were permitted to park. Then displays */
+    /* permit information based on decision and student */
+    /* information. */
+    public RecieptFrame(Student s, boolean isAccepted) {
 
         // set required vars for output
+        System.out.println(s);
         face = "Times New Roman";
         size = 24;
         style = Font.PLAIN;
