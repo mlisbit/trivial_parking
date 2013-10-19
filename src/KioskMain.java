@@ -29,35 +29,36 @@ class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 	StudentDatabase sdb;
 	InsuranceDatabase idb;
 	ParkingDatabase pdb;
+	//steps are used to ensure the client is filling out the form in the proper order. 
 	int current_step = 1;
 
-
+	//save gathered new signup information from form in strings.
 	String studentNumber, studentFirstName, studentLastName, studentCarLicense, studentCarModel, studentCarInsurance, studentPassword;
+	//save gathered ticket information entered. 
 	String purchaseHour, purchaseAMPM, purchaseMinute, purchaseYear, purchaseMonth, purchaseDay;
 
+	//get the days in a month. return a string. This needs to be done properly... 
 	public String[] getDaysInMonth(int month) {
 		String[] i = new String[31];
-		for (int k = 1 ; k <= 31 ; k++) {
+		for (int k = 1 ; k <= 31 ; k++)
 			i[k-1] = String.valueOf(k);
-		}
-
 		return i;
 	}
-
-
+	//main keyboard view.
 	public JPanel keyboardView() {
+		//array storing the characters in each row. 
 		String firstRow[][] = {
-										{"~","1","2","3","4","5","6","7","8","9","0","Back"},
-		 								{"Tab","Q","W","E","R","T","Y","U","I","O","P","@"},
-										{"Caps","A","S","D","F","G","H","J","K","L","Enter"},
-										{"Shift","Z","X","C","V","B","N","M",",","."},
+										{"1","2","3","4","5","6","7","8","9","0","Back"},
+		 								{"Q","W","E","R","T","Y","U","I","O","P"},
+										{".", "A","S","D","F","G","H","J","K","L","@"},
+										{"Z","X","C","V","B","N","M",","},
 										{"Space" },
 									};	
 
 		JPanel keyBoardPane = new JPanel();
 
 		keyBoardPane.setLayout(new GridLayout(5,1));
-    	//pack the components
+    	
    	pack();
 		for (int r = 0 ; r < 5 ; r++) {
 			JButton row[] = new JButton[firstRow[r].length];
@@ -197,9 +198,10 @@ public JPanel sidePanelView() {
 	   	return objectList;
 		}
 
-
+	//validates the students information
 	public void getStudentInfo() {
 		try {
+				//gets all the textfields in current view
 				ArrayList<JTextField> fields = getAllComponents(this.panel);
 
 				//only change the values if the fields are not blank
@@ -212,26 +214,29 @@ public JPanel sidePanelView() {
 
 				initCarInfoPage();
 
-			} catch (Exception exception) {
-				System.out.println("incorrect info");
-				
-			}
+			} catch (Exception exception) {}
 	}
+
+	//action listener for views
 	public void actionPerformed(ActionEvent e) {
+		//if the user initially logs in, this is theaction taken to validate their info
 		if (e.getActionCommand() == "login_authenticate") {
+			//reset the current step they are on. we know they are on this view, so theres no way for them to get to it without bing on step 1
 			current_step = 1;
 			try {
+				//get all the textfields from login page (their student number and password)
 				ArrayList<JTextField> fields = getAllComponents(this.panel);
 
 				String studentnumber = fields.get(0).getText();
 				String password = fields.get(1).getText();
 
+				//checks if the student is already in the database, and if so takes them to purchase view.
 				if (sdb.authorizeStudent(Integer.parseInt(studentnumber), Integer.parseInt(password))) {
 					initPurchaseView();
 				}
 
 			} catch (Exception exception) {
-				initErrorView();
+				initErrorView(); //if the student is not found or entered invalid information
 			}
 		}
 		else if (e.getActionCommand() == "Car_Information") {	
@@ -241,11 +246,13 @@ public JPanel sidePanelView() {
 				current_step++;
 			}
 		}
+		//this is the initial view after clicking new client, so there is no information to view, just return the view. 
 		else if (e.getActionCommand() == "Student_Information") {
 			if (current_step == 1) {
 				initCustomerInfoPage();
 			}
 		}
+		//we know the prior view was the car info page, so we must first collect all that information
 		else if (e.getActionCommand() == "Choose_Password") {
 			if (current_step == 2) {
 				ArrayList<JComboBox> fields = getGroupComponents(this.panel);
@@ -254,21 +261,24 @@ public JPanel sidePanelView() {
 				studentCarModel = otherfields.get(0).getText();
 				studentCarLicense = otherfields.get(1).getText();
 				studentCarInsurance = String.valueOf(fields.get(0).getSelectedItem());
-				//String studentCarInsurance = fields.get(0).getSelectedItem();
-	
+				
+				//move on to the final step
 				current_step++;
 				initChoosePassPage();
 			}
 				
 		}
-		else if (e.getActionCommand() == "new_client") {
-			initCustomerInfoPage();
+		else if (e.getActionCommand() == "purchase") { 
+			//this is where you call the receipt.
 		}
+		//final button on new client form
 		else if (e.getActionCommand() == "complete") {
+			//ensure they are on this step.
 			if (current_step==3) {
 				current_step=1;
 			
 				try {
+				//collect all the information from the form and validate it 
 				if(studentNumber == null && studentNumber.isEmpty()) {
 					if (sdb.saveStudent(Integer.parseInt(studentNumber), Integer.parseInt(studentPassword), studentLastName, studentFirstName))
 						sdb.saveInsuranceCompany(Integer.parseInt(studentNumber), studentCarInsurance, Integer.parseInt(studentCarLicense));
@@ -278,14 +288,16 @@ public JPanel sidePanelView() {
 					else 
 						initErrorView();
 				} catch (IOException exception) {
-				initLoginPage();
+				initErrorView();
 			}
 			}
 		}
+		//if the user decides to leave the form for new client signup
 		else if (e.getActionCommand() == "Cancel") {
 			initLoginPage();
 			current_step = 1;
 		}
+		//collect all the information from initPurchaseView()
 		else if (e.getActionCommand() == "Purchase") {
 			ArrayList<JComboBox> purchaseFields = getGroupComponents(this.panel);
 	
@@ -296,8 +308,10 @@ public JPanel sidePanelView() {
 			purchaseMinute = String.valueOf(purchaseFields.get(4).getSelectedItem());
 			purchaseAMPM 	= String.valueOf(purchaseFields.get(5).getSelectedItem());
 			
+			//take them to the confirmation view page
 			initConfirmationView();
 		}
+		//every other action must be a keyboard input, so validate that,
 		else {
 			switch(e.getActionCommand()) {
 				case 	"Space": 	Global.selectedTextField.setText(Global.selectedTextField.getText() + " ");
@@ -313,6 +327,7 @@ public JPanel sidePanelView() {
 		this.setContentPane(panel);
 	}
 	
+	//new client signup step 1, enter information (student#, lastname, firstname)
 	public JPanel mainStudentProfileView() {
 		JPanel mainPane = new JPanel();
 
@@ -342,6 +357,7 @@ public JPanel sidePanelView() {
 		return mainPane;
 	}
 
+	//initial login screen, asking for student number and pin
 	public JPanel mainLoginView() {
 		JPanel mainPane = new JPanel();
 		JTextField studentNumberField = new JTextField("",20);
@@ -397,7 +413,7 @@ public JPanel sidePanelView() {
 		newClient.setFont(Global.buttonFont);
 
 		login.setActionCommand("login_authenticate");
-		newClient.setActionCommand("new_client");
+		newClient.setActionCommand("Student_Information");
 
 		login.addActionListener(this);	
 		newClient.addActionListener(this);	
@@ -444,6 +460,7 @@ public JPanel sidePanelView() {
 		return mainPane;
 	}
 
+	//styling of the buttons on the purchase page
 	public JPanel mainPurchasebuttons() {
 		JPanel buttonHolders =  new JPanel();
 		buttonHolders.setBackground(Global.mainBackground);
@@ -469,6 +486,7 @@ public JPanel sidePanelView() {
 		return buttonHolders;
 	}
 
+	//where the user inputs the time information for their ticket.
 	public JPanel mainPurchaseView() {
 		JPanel mainPane = new JPanel();
 		mainPane.setBackground(Global.mainBackground);
@@ -511,6 +529,7 @@ public JPanel sidePanelView() {
 		return mainPane;
 	}
 
+	//when theres an error of some sort (user didnt input proper information, call this.)
 	public JPanel mainErrorView() {
 		JPanel mainPane = new JPanel();
 		mainPane.setBackground(Global.mainBackground);
@@ -532,6 +551,7 @@ public JPanel sidePanelView() {
 		return mainPane;
 	}
 
+	//on the newclient signup page, this is step 3, where the user chooses their password 
 	public JPanel choosePasswordView() {
 		JPanel mainPane = new JPanel();
 
@@ -555,6 +575,7 @@ public JPanel sidePanelView() {
 		return mainPane;
 	}
 
+	//after the purchase page, this is where the user confirms his ticket information
 	public JPanel mainConfirmationView() {
 		JPanel mainPane = new JPanel();
 
@@ -566,7 +587,7 @@ public JPanel sidePanelView() {
 		mainPane.add(new JLabel(purchaseAMPM, JLabel.CENTER));
 
 		mainPane.add(new JLabel("do you accept these charges?", JLabel.CENTER));
-		JButton ok = createSimpleButton("OK");
+		JButton ok = createSimpleButton("purchase");
 		ok.addActionListener(this);	
 		ok.setActionCommand("Cancel");
 
@@ -576,50 +597,56 @@ public JPanel sidePanelView() {
 		mainPane.add(ok);
 		return mainPane;
 	}
+
+	//initialise the ENTIRE view of the car info page in the new client signup
 	public void initCarInfoPage() {
 		panel.removeAll();
 		panel.add(carInfoView(), "Center");
 		panel.add(keyboardView(), "South");
 		panel.add(sidePanelView(), "East");
 	}
-
+	//initialise the ENTIRE view of the choose password page in the new client signup
 	public void initChoosePassPage() {
 		panel.removeAll();
 		panel.add(choosePasswordView(), "Center");
 		panel.add(keyboardView(), "South");
 		panel.add(sidePanelView(), "East");
 	}
-
+	//initialise the ENTIRE view of the login page.
 	public void initLoginPage() {
 		panel.removeAll();
 		panel.add(mainLoginView(), "Center");
 		panel.add(keyboardView(), "South");
 	}
-
+	//initialise the ENTIRE view for the Customer info page (student number, alstname, firstname view.).
 	public void initCustomerInfoPage() {
 		panel.removeAll();
 		panel.add(mainStudentProfileView(), "Center");
 		panel.add(keyboardView(), "South");
 		panel.add(sidePanelView(), "East");
 	}
-
+	//initialise the ENTIRE view for the purchase view. 
 	public void initPurchaseView() {
 		panel.removeAll();
 		panel.add(mainPurchaseView(), "Center");
 		panel.add(keyboardView(), "South");
 	}
 
+	//initialise the ENTIRE view for the confirmation of ticket purchase view. 
 	public void initConfirmationView() {
 		panel.removeAll();
 		panel.add(mainConfirmationView(), "Center");
 	}
 
+	//initialise the ENTIRE error page, displayed when something went wrong.
 	public void initErrorView() {
 		panel.removeAll();
 		panel.add(mainErrorView(), "Center");
 	}
 
+	//main method.
 	public KioskMainFrame() {
+		//load in the databases 
 		try {
 			sdb = new StudentDatabase("students.txt");
 			idb = new InsuranceDatabase("companies.txt");
