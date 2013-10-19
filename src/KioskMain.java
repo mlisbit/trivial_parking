@@ -29,6 +29,11 @@ class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 	StudentDatabase sdb;
 	InsuranceDatabase idb;
 	ParkingDatabase pdb;
+	int current_step = 1;
+
+
+	String studentNumber, studentFirstName, studentLastName, studentCarLicense, studentCarModel, studentCarInsurance, studentPassword;
+
 
 	public String[] getDaysInMonth(int month) {
 		String[] i = new String[31];
@@ -38,6 +43,7 @@ class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 
 		return i;
 	}
+
 
 	public JPanel keyboardView() {
 		String firstRow[][] = {
@@ -76,25 +82,29 @@ class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 	}
 
 public JPanel sidePanelView() {
-		JButton b1, b2, b3, b4; 
+		JButton b0, b1, b2, b3, b4; 
 		JPanel sidePane = new JPanel();
-		sidePane.setLayout(new GridLayout(4,1, 5, 5));
+		sidePane.setLayout(new GridLayout(5,1, 5, 5));
 
-		b1 = createSimpleButton("Student Information");
-		b2 = createSimpleButton("Car Information");
-		b3 = createSimpleButton("Choose Password");
+		b0 = createSimpleButton("Cancel");
+		b1 = createSimpleButton("Step 1.");
+		b2 = createSimpleButton("Step 2.");
+		b3 = createSimpleButton("Step 3.");
 		b4 = createSimpleButton("Complete");
 
+		b0.setActionCommand("Cancel");
 		b1.setActionCommand("Student_Information");
 		b2.setActionCommand("Car_Information");
 		b3.setActionCommand("Choose_Password");
 		b4.setActionCommand("complete");
 
+		b0.addActionListener(this);	
 		b1.addActionListener(this);	
 		b2.addActionListener(this);	
 		b3.addActionListener(this);	
 		b4.addActionListener(this);	
 
+		sidePane.add(b0);
 		sidePane.add(b1);
 		sidePane.add(b2);
 		sidePane.add(b3);
@@ -140,7 +150,6 @@ public JPanel sidePanelView() {
 	  		//prevents loosing focus while typing.
 		   if (e.getSource() instanceof JTextField) {
 		   	Global.selectedTextField = (JTextField)(e.getSource());
-		   	System.out.println("boom");
 		   }
 	  }
 	  public void mouseClicked(MouseEvent e){}
@@ -165,48 +174,112 @@ public JPanel sidePanelView() {
 	        			}
 	        		}    
 	            compList.addAll(getAllComponents((Container)comp));
-
 	    }
 	   	 return objectList;
 		}
 
+	public static ArrayList getGroupComponents(final Container c) {
+	    Component[] comps = c.getComponents();
+	    ArrayList compList = new ArrayList<Component>();
+	    ArrayList objectList = new ArrayList<JTextField>();
+	    for (Component comp : comps) {
+	        compList.add(comp);
+	        if (comp instanceof Container)
+	        		for (Component k : ((Container)comp).getComponents()) {
+	        			if (k instanceof JComboBox) {
+	        				JComboBox comboField = (JComboBox)k;
+	        				objectList.add(comboField);
+	        				//System.out.println(textField.getName());
+	        			}
+	        		}    
+	            compList.addAll(getAllComponents((Container)comp));
+	    	}
+	   	return objectList;
+		}
 
 
+	public void getStudentInfo() {
+		try {
+				ArrayList<JTextField> fields = getAllComponents(this.panel);
+
+				//only change the values if the fields are not blank
+				if (fields.get(0).getText() != "") 
+					studentFirstName = fields.get(0).getText();
+				if (fields.get(1).getText() != "") 
+					studentLastName = fields.get(1).getText();
+				if (fields.get(2).getText() != "") 
+					studentNumber = fields.get(2).getText();
+
+				initCarInfoPage();
+
+			} catch (Exception exception) {
+				System.out.println("incorrect info. but for testing we ill let you through.");
+				
+			}
+	}
 	public void actionPerformed(ActionEvent e) {
-		System.out.println(e.getActionCommand());
+		System.out.println(current_step);
 		if (e.getActionCommand() == "login_authenticate") {
+			current_step = 1;
 			try {
-			ArrayList<JTextField> fields = getAllComponents(this.panel);
+				ArrayList<JTextField> fields = getAllComponents(this.panel);
 
-			String studentnumber = fields.get(0).getText();
-			String password = fields.get(1).getText();
+				String studentnumber = fields.get(0).getText();
+				String password = fields.get(1).getText();
 
-			if (sdb.authorizeStudent(Integer.parseInt(studentnumber), Integer.parseInt(password))) {
+				if (sdb.authorizeStudent(Integer.parseInt(studentnumber), Integer.parseInt(password))) {
+					initPurchaseView();
+				}
+
+			} catch (Exception exception) {
+				System.out.println("incorrect student number or password. but for testing we ill let you through.");
 				initPurchaseView();
 			}
-		} catch (Exception exception) {
-
 		}
-
-			
-		}
-		else if (e.getActionCommand() == "Car_Information") {
-			initCarInfoPage();
+		else if (e.getActionCommand() == "Car_Information") {	
+			//we know the view prior this one was the student view, so we must collect the information
+			if (current_step == 1) {
+				getStudentInfo();
+				current_step++;
+			}
 		}
 		else if (e.getActionCommand() == "Student_Information") {
-			initCustomerInfoPage();
+			if (current_step == 1) {
+				initCustomerInfoPage();
+			}
 		}
 		else if (e.getActionCommand() == "Choose_Password") {
-			initChoosePassPage();
+			if (current_step == 2) {
+				current_step++;
+				initChoosePassPage();
+			}
+				
 		}
 		else if (e.getActionCommand() == "new_client") {
 			initCustomerInfoPage();
 		}
 		else if (e.getActionCommand() == "complete") {
-			initLoginPage();
+			if (current_step==3) {
+				current_step=1;
+			
+				//int num, int pin, String last, String first
+				try {
+				if(studentNumber == null && studentNumber.isEmpty()) {
+					System.out.println("fuck");
+					if (sdb.saveStudent(Integer.parseInt(studentNumber), Integer.parseInt(studentPassword), studentLastName, studentFirstName))
+						System.out.println("VALID!");
+						initLoginPage();
+					}
+					else 
+						initLoginPage();
+				} catch (IOException exception) {
+				initLoginPage();
+			}
+			}
 		}
 		else if (e.getActionCommand() == "Cancel") {
 			initLoginPage();
+			current_step = 1;
 		}
 		else if (e.getActionCommand() == "Purchase") {
 			initConfirmationView();
@@ -322,11 +395,22 @@ public JPanel sidePanelView() {
 		return buttonHolders;
 	}
 
+	//The view where the user inputs their car information!
 	public JPanel carInfoView() {
 		JPanel mainPane = new JPanel();
-
+		
 		JTextField carModelField = new JTextField("",20);
 		JTextField licensePlateField = new JTextField("",20);
+		JComboBox insuranceChoice;
+
+		System.out.println(idb.getCompanies().size());
+
+		String [] insuranceCompanies = new String[idb.getCompanies().size()];
+		
+		for (int counter = 0; counter < idb.getCompanies().size() ; counter++) 
+			insuranceCompanies[counter] = idb.getCompanies().get(counter).toString();
+		
+		insuranceChoice = createSimpleGroupBox(insuranceCompanies);
 
 		carModelField.setFont(Global.formFont);
 		carModelField.addMouseListener(this);
@@ -338,6 +422,9 @@ public JPanel sidePanelView() {
       mainPane.add(Box.createHorizontalStrut(15)); // a spacer
       mainPane.add(new JLabel("Car Model:", JLabel.CENTER));
       mainPane.add(carModelField);
+      mainPane.add(new JLabel("Insurance Company:", JLabel.CENTER));
+      mainPane.add(insuranceChoice);
+
 
       mainPane.setLayout(new GridLayout(10,1));
       mainPane.setBackground(Global.mainBackground);
