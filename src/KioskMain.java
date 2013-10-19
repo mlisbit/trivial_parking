@@ -33,7 +33,7 @@ class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 
 
 	String studentNumber, studentFirstName, studentLastName, studentCarLicense, studentCarModel, studentCarInsurance, studentPassword;
-
+	String purchaseHour, purchaseAMPM, purchaseMinute, purchaseYear, purchaseMonth, purchaseDay;
 
 	public String[] getDaysInMonth(int month) {
 		String[] i = new String[31];
@@ -181,18 +181,18 @@ public JPanel sidePanelView() {
 	public static ArrayList getGroupComponents(final Container c) {
 	    Component[] comps = c.getComponents();
 	    ArrayList compList = new ArrayList<Component>();
-	    ArrayList objectList = new ArrayList<JTextField>();
+	    ArrayList objectList = new ArrayList<JComboBox>();
 	    for (Component comp : comps) {
 	        compList.add(comp);
-	        if (comp instanceof Container)
+	        if (comp instanceof Container) 
 	        		for (Component k : ((Container)comp).getComponents()) {
 	        			if (k instanceof JComboBox) {
 	        				JComboBox comboField = (JComboBox)k;
 	        				objectList.add(comboField);
 	        				//System.out.println(textField.getName());
 	        			}
-	        		}    
-	            compList.addAll(getAllComponents((Container)comp));
+	        		compList.addAll(getAllComponents((Container)comp));		   
+	        }
 	    	}
 	   	return objectList;
 		}
@@ -213,12 +213,11 @@ public JPanel sidePanelView() {
 				initCarInfoPage();
 
 			} catch (Exception exception) {
-				System.out.println("incorrect info. but for testing we ill let you through.");
+				System.out.println("incorrect info");
 				
 			}
 	}
 	public void actionPerformed(ActionEvent e) {
-		System.out.println(current_step);
 		if (e.getActionCommand() == "login_authenticate") {
 			current_step = 1;
 			try {
@@ -232,8 +231,7 @@ public JPanel sidePanelView() {
 				}
 
 			} catch (Exception exception) {
-				System.out.println("incorrect student number or password. but for testing we ill let you through.");
-				initPurchaseView();
+				initErrorView();
 			}
 		}
 		else if (e.getActionCommand() == "Car_Information") {	
@@ -250,6 +248,14 @@ public JPanel sidePanelView() {
 		}
 		else if (e.getActionCommand() == "Choose_Password") {
 			if (current_step == 2) {
+				ArrayList<JComboBox> fields = getGroupComponents(this.panel);
+				ArrayList<JTextField> otherfields = getAllComponents(this.panel);
+
+				studentCarModel = otherfields.get(0).getText();
+				studentCarLicense = otherfields.get(1).getText();
+				studentCarInsurance = String.valueOf(fields.get(0).getSelectedItem());
+				//String studentCarInsurance = fields.get(0).getSelectedItem();
+	
 				current_step++;
 				initChoosePassPage();
 			}
@@ -262,16 +268,15 @@ public JPanel sidePanelView() {
 			if (current_step==3) {
 				current_step=1;
 			
-				//int num, int pin, String last, String first
 				try {
 				if(studentNumber == null && studentNumber.isEmpty()) {
-					System.out.println("fuck");
 					if (sdb.saveStudent(Integer.parseInt(studentNumber), Integer.parseInt(studentPassword), studentLastName, studentFirstName))
-						System.out.println("VALID!");
+						sdb.saveInsuranceCompany(Integer.parseInt(studentNumber), studentCarInsurance, Integer.parseInt(studentCarLicense));
+						//sdb.saveCarModel(studentCarModel);
 						initLoginPage();
 					}
 					else 
-						initLoginPage();
+						initErrorView();
 				} catch (IOException exception) {
 				initLoginPage();
 			}
@@ -282,6 +287,15 @@ public JPanel sidePanelView() {
 			current_step = 1;
 		}
 		else if (e.getActionCommand() == "Purchase") {
+			ArrayList<JComboBox> purchaseFields = getGroupComponents(this.panel);
+	
+			purchaseMonth 	= String.valueOf(purchaseFields.get(0).getSelectedItem());
+			purchaseDay 	= String.valueOf(purchaseFields.get(1).getSelectedItem());
+			purchaseYear 	= String.valueOf(purchaseFields.get(2).getSelectedItem());
+			purchaseHour 	= String.valueOf(purchaseFields.get(3).getSelectedItem());
+			purchaseMinute = String.valueOf(purchaseFields.get(4).getSelectedItem());
+			purchaseAMPM 	= String.valueOf(purchaseFields.get(5).getSelectedItem());
+			
 			initConfirmationView();
 		}
 		else {
@@ -403,8 +417,6 @@ public JPanel sidePanelView() {
 		JTextField licensePlateField = new JTextField("",20);
 		JComboBox insuranceChoice;
 
-		System.out.println(idb.getCompanies().size());
-
 		String [] insuranceCompanies = new String[idb.getCompanies().size()];
 		
 		for (int counter = 0; counter < idb.getCompanies().size() ; counter++) 
@@ -432,69 +444,6 @@ public JPanel sidePanelView() {
 		return mainPane;
 	}
 
-	//date picking buttons yo
-	public JPanel mainPurchaseDateView() {
-		JPanel mainPane = new JPanel();
-		JPanel datePane = new JPanel();
-		datePane.setLayout(new GridLayout(1,6));
-		String[] months = {"Jan", "Feb", "March", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"};
-		String[] years = {"2013", "2014", "2015"};
-		mainPane.setBackground(Global.mainBackground);
-		JComboBox monthList;
-		JComboBox yearList;
-		JComboBox dayList;
-
-		JLabel label = new JLabel("Till what day? : ");
-		label.setFont(Global.formFont);
-		mainPane.add(label);
-		monthList = createSimpleGroupBox(months);
-		yearList = createSimpleGroupBox(years);
-		dayList = createSimpleGroupBox(getDaysInMonth(0));
-		monthList.setSelectedIndex(9);
-		dayList.setSelectedIndex(9);
-		yearList.setSelectedIndex(2);
-
-		datePane.add(monthList);
-		datePane.add(dayList);
-		datePane.add(yearList);
-		mainPane.add(datePane);
-
-		return mainPane;
-	}
-
-	public JPanel mainPurchaseTimeView() {
-		JPanel mainPane = new JPanel();
-
-		JPanel timePane = new JPanel();
-		timePane.setLayout(new GridLayout(1,6));
-		String[] hours = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
-		String[] minutes = {"00", "15", "30", "45"};
-		String[] ampm = {"AM", "PM"};
-
-		mainPane.setBackground(Global.mainBackground);
-		JComboBox hourList;
-		JComboBox minuteList;
-		JComboBox ampmList;
-
-		JLabel label = new JLabel("Till what time? : ");
-		label.setFont(Global.formFont);
-		mainPane.add(label);
-
-		hourList = createSimpleGroupBox(hours);
-		minuteList = createSimpleGroupBox(minutes);
-		ampmList = createSimpleGroupBox(ampm);
-		/*
-		hourList.setSelectedIndex();
-		minuteList.setSelectedIndex();
-		ampmList.setSelectedIndex();
-		*/
-		timePane.add(hourList);
-		timePane.add(minuteList);
-		timePane.add(ampmList);
-		mainPane.add(timePane);
-		return mainPane;
-	}
-
 	public JPanel mainPurchasebuttons() {
 		JPanel buttonHolders =  new JPanel();
 		buttonHolders.setBackground(Global.mainBackground);
@@ -504,7 +453,6 @@ public JPanel sidePanelView() {
 		
 		login.setActionCommand("Purchase");
 		newClient.setActionCommand("Cancel");
-
 
 		login.setFont(Global.buttonFont);
 		newClient.setFont(Global.buttonFont);
@@ -524,12 +472,63 @@ public JPanel sidePanelView() {
 	public JPanel mainPurchaseView() {
 		JPanel mainPane = new JPanel();
 		mainPane.setBackground(Global.mainBackground);
+
+		String[] hours 	= 	{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
+		String[] minutes 	= 	{"00", "15", "30", "45"};
+		String[] ampm 		= 	{"AM", "PM"};
+		String[] months 	= 	{"Jan", "Feb", "March", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"};
+		String[] years 	= 	{"2013", "2014", "2015"};
+
+		JComboBox hourList;
+		JComboBox minuteList;
+		JComboBox ampmList;
+		JComboBox monthList;
+		JComboBox yearList;
+		JComboBox dayList;
+
+		monthList 	= createSimpleGroupBox(months);
+		yearList 	= createSimpleGroupBox(years);
+		dayList 		= createSimpleGroupBox(getDaysInMonth(0));
+		hourList 	= createSimpleGroupBox(hours);
+		minuteList 	= createSimpleGroupBox(minutes);
+		ampmList 	= createSimpleGroupBox(ampm);
+
+		JPanel datePane = new JPanel();
+		datePane.setLayout(new GridLayout(1,6));
+
+		mainPane.add(new JLabel("To what time?", JLabel.CENTER));
+		mainPane.add(monthList);
+		mainPane.add(yearList);
+		mainPane.add(dayList);
+		mainPane.add(new JLabel("To what day?", JLabel.CENTER));
+		mainPane.add(hourList);
+		mainPane.add(minuteList);
+		mainPane.add(ampmList);
 		
-		mainPane.add(mainPurchaseDateView());
-		mainPane.add(mainPurchaseTimeView());
 		mainPane.add(new JLabel("Parking Rate 25cents / hour:", JLabel.CENTER));
 		mainPane.add(mainPurchasebuttons());
 		mainPane.setLayout(new GridLayout(10,1));
+		return mainPane;
+	}
+
+	public JPanel mainErrorView() {
+		JPanel mainPane = new JPanel();
+		mainPane.setBackground(Global.mainBackground);
+		JLabel warning = new JLabel("Sorry, but there has been error", JLabel.CENTER);
+		JLabel warning2 = new JLabel("The information you have entered is invalid!", JLabel.CENTER);
+		mainPane.add(warning);
+		mainPane.add(warning2);
+
+		JButton ok = createSimpleButton("OK");
+		ok.addActionListener(this);	
+		ok.setActionCommand("Cancel");
+
+		ok.setFont(Global.buttonFont);
+		ok.setBorder( new EmptyBorder( 10, 10, 10, 10 ) );
+		ok.setBackground(new Color (34, 139, 34));
+		mainPane.add(ok);
+		mainPane.setLayout(new GridLayout(10,1));
+
 		return mainPane;
 	}
 
@@ -558,7 +557,23 @@ public JPanel sidePanelView() {
 
 	public JPanel mainConfirmationView() {
 		JPanel mainPane = new JPanel();
+
+		mainPane.add(new JLabel(purchaseMonth, JLabel.CENTER));
+		mainPane.add(new JLabel(purchaseDay, JLabel.CENTER));
+		mainPane.add(new JLabel(purchaseYear, JLabel.CENTER));
+		mainPane.add(new JLabel(purchaseHour, JLabel.CENTER));
+		mainPane.add(new JLabel(purchaseMinute, JLabel.CENTER));
+		mainPane.add(new JLabel(purchaseAMPM, JLabel.CENTER));
+
 		mainPane.add(new JLabel("do you accept these charges?", JLabel.CENTER));
+		JButton ok = createSimpleButton("OK");
+		ok.addActionListener(this);	
+		ok.setActionCommand("Cancel");
+
+		ok.setFont(Global.buttonFont);
+		ok.setBorder( new EmptyBorder( 10, 10, 10, 10 ) );
+		ok.setBackground(new Color (34, 139, 34));
+		mainPane.add(ok);
 		return mainPane;
 	}
 	public void initCarInfoPage() {
@@ -599,6 +614,10 @@ public JPanel sidePanelView() {
 		panel.add(mainConfirmationView(), "Center");
 	}
 
+	public void initErrorView() {
+		panel.removeAll();
+		panel.add(mainErrorView(), "Center");
+	}
 
 	public KioskMainFrame() {
 		try {
