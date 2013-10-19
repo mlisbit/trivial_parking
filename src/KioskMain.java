@@ -268,7 +268,7 @@ public JPanel sidePanelView() {
 			}
 				
 		}
-		else if (e.getActionCommand() == "purchase") { 
+		else if (e.getActionCommand() == "Purchase_confirm") { 
 			//this is where you validate and call the receipt.
 		}
 		//final button on new client form
@@ -587,7 +587,7 @@ public JPanel sidePanelView() {
 		mainPane.add(new JLabel(purchaseAMPM, JLabel.CENTER));
 
 		mainPane.add(new JLabel("do you accept these charges?", JLabel.CENTER));
-		JButton ok = createSimpleButton("purchase");
+		JButton ok = createSimpleButton("Purchase_confirm");
 		ok.addActionListener(this);	
 		ok.setActionCommand("Cancel");
 
