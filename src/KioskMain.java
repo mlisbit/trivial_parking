@@ -589,10 +589,10 @@ public JPanel sidePanelView() {
 		secondPassField.setFont(Global.formFont);
 		secondPassField.addMouseListener(this);
 
-		mainPane.add(new JLabel("Enter Desired Password:", JLabel.CENTER));
+		mainPane.add(new JLabel("Enter PIN", JLabel.CENTER));
         mainPane.add(firstPassField);
         mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-        mainPane.add(new JLabel("Confirm Password", JLabel.CENTER));
+        mainPane.add(new JLabel("Confirm PIN", JLabel.CENTER));
         mainPane.add(secondPassField);
 
         mainPane.setLayout(new GridLayout(10,1));
