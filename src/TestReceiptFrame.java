@@ -9,7 +9,7 @@ public class TestReceiptFrame {
         try {
             sdb = new StudentDatabase("students.txt");
             Student s = sdb.getStudent(123456789);
-            ReceiptFrame frame = new ReceiptFrame(s, true);         
+            ReceiptFrame frame = new ReceiptFrame(s, false);         
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setTitle("Testing Testing");
             frame.setPreferredSize(new Dimension(800, 400));

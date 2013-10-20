@@ -277,13 +277,17 @@ public JPanel sidePanelView() {
             //
             // Try to get a parking spot
 		    String spot = pdb.getAvailableSpot();
-		    if (spot.equals(""))
-		        initErrorView();
-
-		    // Save the spot in the student database and change status
-
 		    s.setParkingSpot(spot);
-		    ReceiptFrame frame = new ReceiptFrame(s, true); 	
+		    ReceiptFrame frame;
+
+		    // Display proper receipt based on whether there's a spot available
+		    if (spot.equals("")) {
+                frame = new ReceiptFrame(s, false); 
+            } else {
+                frame = new ReceiptFrame(s, true);
+		    }
+
+		    // ReceiptFrame properties
 		    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		    frame.setTitle("Kiosk Permit");
 		    frame.setPreferredSize(new Dimension(800, 400));
