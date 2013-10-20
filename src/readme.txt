@@ -1,5 +1,5 @@
 cse13195, 210352698, Luna, Dominique
-cse13195, 207937469, Anderson, Devon
+cse13181, 207937469, Anderson, Devon
 cse13195, 210352698, Lis, Maciej            add your proper numbers here!!!
 
 Also I think we need to change the name of KioskMain.java to a1.java
