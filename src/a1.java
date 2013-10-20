@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.io.IOException;
 import java.util.*;
 
-public class KioskMain {
+public class a1 {
 	public static void main(String[] args) {
 		// use look and feel for my system (Win32)
 		try {
@@ -281,27 +281,15 @@ public JPanel sidePanelView() {
 		        initErrorView();
 
 		    // Save the spot in the student database and change status
-		    try {
-		        sdb.saveParkingSpot(sn, spot, pdb);
-                ReceiptFrame frame = new ReceiptFrame(s, true);     
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setTitle("Kiosk Permit");
-                frame.setPreferredSize(new Dimension(800, 400));
-                frame.pack();
-                frame.setVisible(true);
-                initLoginPage();
 
-		    } catch (IOException ioe) {
-                initErrorView();
-		    }
-
-		    /* ReceiptFrame frame = new ReceiptFrame(s, true); 	 */
-		    /* frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); */
-		    /* frame.setTitle("Kiosk Permit"); */
-		    /* frame.setPreferredSize(new Dimension(800, 400)); */
-		    /* frame.pack(); */
-		    /* frame.setVisible(true); */
-		    /* initLoginPage(); */
+		    s.setParkingSpot(spot);
+		    ReceiptFrame frame = new ReceiptFrame(s, true); 	
+		    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		    frame.setTitle("Kiosk Permit");
+		    frame.setPreferredSize(new Dimension(800, 400));
+		    frame.pack();
+		    frame.setVisible(true);
+		    initLoginPage();
 		}
 		//final button on new client form
 		else if (cmd == "complete") {
@@ -313,7 +301,7 @@ public JPanel sidePanelView() {
 				//collect all the information from the form and validate it 
 				if(studentNumber == null && studentNumber.isEmpty()) {
 					if (sdb.saveStudent(Integer.parseInt(studentNumber), Integer.parseInt(studentPassword), studentLastName, studentFirstName))
-						sdb.saveInsuranceCompany(Integer.parseInt(studentNumber), studentCarInsurance, Integer.parseInt(studentCarLicense));
+						sdb.saveInsuranceCompany(Integer.parseInt(studentNumber), studentCarInsurance, Integer.parseInt(studentCarLicense), studentCarModel);
 						//sdb.saveCarModel(studentCarModel);
 						initLoginPage();
 					}

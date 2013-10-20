@@ -81,6 +81,10 @@ public class Student {
 	public int getStudentNumber() {
 		return this.studentNumber;
 	}	
+
+	public void setParkingSpot(String spot) {
+        this.spot = spot;
+	}
 	
 	public Boolean equals(Student student) {
 		if(student == this)
