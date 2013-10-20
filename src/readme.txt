@@ -1,6 +1,6 @@
 cse13195, 210352698, Luna, Dominique
 cse13181, 207937469, Anderson, Devon
-cse13195, 210352698, Lis, Maciej            add your proper numbers here!!!
+cse13195, 211704558, Lis, Maciej        
 
 Also I think we need to change the name of KioskMain.java to a1.java
 to make them happy
@@ -51,5 +51,17 @@ Design Philosophies
         3)  Makes it easy to assign roles to people in the group and not duplicate code.
 
 
-    GUI Design # Maciej you probably wanna write something here
+    GUI Design
+    
+        1)  we chose to go with a flat UI for the overall look and feel of the application, something that's
+            really starting to pick up trend - when people look at a screen, especially one without a keyboard they 
+            intuitively think it's responsive to touch. So we felt this was a safe, and stylish approach. 
+            
+        2)  instead of presenting the user with one huge form to fill out, we felt breaking it up into peices would 
+            ease the initial burden of being presented a massive form. Something none of us like to fill out.
+            If the user feels the form is to long, they may click cancel at any point to clear
+            progress and return to the initial login screen. 
+        
+        3)  the application supports multiple window sizes, but is intended to be run as full screen. 
+        
 
