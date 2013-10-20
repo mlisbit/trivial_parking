@@ -27,10 +27,10 @@ public class StudentDatabase extends Database {
 	        
 	        Student student;
 	        //use different kinds of students depending on how complete the account is.
-	        if(parts.length == 8)
-	        	student = new Student(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), parts[2], parts[3], parts[4], parts[5], Integer.parseInt(parts[6]), parts[7]);	        	
-	        else if(parts.length == 7)
-	        	student = new Student(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), parts[2], parts[3], parts[4], parts[5], Integer.parseInt(parts[6]));
+	        if(parts.length == 9)
+	        	student = new Student(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), parts[2], parts[3], parts[4], parts[5], Integer.parseInt(parts[6]), parts[7], parts[8]);	        	
+	        else if(parts.length == 8)
+	        	student = new Student(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), parts[2], parts[3], parts[4], parts[5], Integer.parseInt(parts[6]), parts[7]);
 	        else
 	        	student = new Student(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), parts[2], parts[3], parts[4]);
 	        
@@ -110,7 +110,7 @@ public class StudentDatabase extends Database {
 	}
 	
 	//add an insurance company to a students record
-	public void saveInsuranceCompany(int num, String company, int policy) throws IOException {
+	public void saveInsuranceCompany(int num, String company, int policy, String model) throws IOException {
 		//truncate the file so we can rebuild it
 		this.open(true);
 		
@@ -121,8 +121,8 @@ public class StudentDatabase extends Database {
 	        	String[] parts = students.get(i).toString().split(",");
 	        	if(parts.length == 5) { //this is the length of an initial record
 	        		Student student = students.get(i);
-	        		data += student.toString() + "," + company + "," + policy;
-	        		students.set(i, new Student(student.getStudentNumber(), student.getPinNumber(), student.getLastName(), student.getFirstName(), student.getStatus(), company, policy));
+	        		data += student.toString() + "," + company + "," + policy + "," + model;
+	        		students.set(i, new Student(student.getStudentNumber(), student.getPinNumber(), student.getLastName(), student.getFirstName(), student.getStatus(), company, policy, model));
 	        	} else
 	        		data += students.get(i).toString();
 	        } else
@@ -148,11 +148,11 @@ public class StudentDatabase extends Database {
 	        if(students.get(i).getStudentNumber() == num) {
 	        	String[] parts = students.get(i).toString().split(",");
 	        	//make sure the student has an insurance record attached and that the parking spot hasn't been taken
-	        	if(parts.length == 7 && pdb.getParkingSpot(spot).getStatus().equals("open")) {
+	        	if(parts.length == 8 && pdb.getParkingSpot(spot).getStatus().equals("open")) {
 	        		pdb.saveParkingStatus(spot, "reserved"); //update the parking spot
 	        		Student student = students.get(i);
 	        		data += student.toString() + "," + spot;
-	        		students.set(i, new Student(student.getStudentNumber(), student.getPinNumber(), student.getLastName(), student.getFirstName(), student.getStatus(), student.getInsuranceCompany(), student.getInsurancePolicy(), spot));
+	        		students.set(i, new Student(student.getStudentNumber(), student.getPinNumber(), student.getLastName(), student.getFirstName(), student.getStatus(), student.getInsuranceCompany(), student.getInsurancePolicy(), student.getCarModel(), spot));
 	        	} else
 	         		data += students.get(i).toString();
 	        } else

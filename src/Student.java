@@ -8,6 +8,7 @@ public class Student {
 	private String status;
 	private String company = "";
 	private int policy = 0;
+	private String model = "";
 	private String spot = "";
 	
 	public Student(int num, int pin, String last, String first, String status) {
@@ -18,7 +19,7 @@ public class Student {
 		this.status = status;
 	}
 	
-	public Student(int num, int pin, String last, String first, String status, String insurance, int policy) {
+	public Student(int num, int pin, String last, String first, String status, String insurance, int policy, String model) {
 		this.studentNumber = num;
 		this.pinNumber = pin;
 		this.lastName = last;
@@ -26,9 +27,10 @@ public class Student {
 		this.status = status;
 		this.company = insurance;
 		this.policy = policy;
+		this.model = model;
 	}
 	
-	public Student(int num, int pin, String last, String first, String status, String insurance, int policy, String spot) {
+	public Student(int num, int pin, String last, String first, String status, String insurance, int policy, String model, String spot) {
 		this.studentNumber = num;
 		this.pinNumber = pin;
 		this.lastName = last;
@@ -36,11 +38,16 @@ public class Student {
 		this.status = status;
 		this.company = insurance;
 		this.policy = policy;
+		this.model = model;
 		this.spot = spot;
 	}
 	
 	public String getParkingSpot() {
 		return this.spot;
+	}
+
+	public String getCarModel() {
+		return this.model;
 	}
 	
 	public int getInsurancePolicy() {
