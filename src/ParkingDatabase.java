@@ -35,6 +35,22 @@ public class ParkingDatabase extends Database {
 				return spots.get(i);
 		return null;
 	}
+
+	public String getAvailableSpot() {
+		for(int i = 0; i < spots.size(); i++) {
+            String spot = spots.get(i).getNumber();
+            String status = spots.get(i).getStatus();
+            if (status.equals("open")) {
+                try { 
+                    saveParkingStatus(spot, "reserved");
+                } catch (IOException e) {
+                    return "";
+                }
+                return spot;
+            }
+        }
+        return "";
+	}
 	
 	public Boolean saveParkingStatus(String num, String status) throws IOException {
 		//truncate the file so we can rebuild it
@@ -59,4 +75,5 @@ public class ParkingDatabase extends Database {
 		
 		return true;	
 	}
+
 }

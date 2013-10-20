@@ -5,6 +5,7 @@ import javax.swing.border.*;
 import java.awt.KeyboardFocusManager;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.util.*;
 
 public class KioskMain {
 	public static void main(String[] args) {
@@ -15,7 +16,7 @@ public class KioskMain {
 		}
 		KioskMainFrame frame = new KioskMainFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setTitle("bitchin parking kiosk");
+		frame.setTitle("YORKU Parking Service");
 		frame.pack();
 		frame.setVisible(true);
 	}
@@ -33,7 +34,7 @@ class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 	int current_step = 1;
 
 	//save gathered new signup information from form in strings.
-	String studentNumber, studentFirstName, studentLastName, studentCarLicense, studentCarModel, studentCarInsurance, studentPassword;
+	String studentNumber, studentFirstName, studentLastName, studentCarLicense, studentCarModel, studentCarInsurance, studentPassword, studentPIN;
 	//save gathered ticket information entered. 
 	String purchaseHour, purchaseAMPM, purchaseMinute, purchaseYear, purchaseMonth, purchaseDay;
 
@@ -88,15 +89,15 @@ public JPanel sidePanelView() {
 		sidePane.setLayout(new GridLayout(5,1, 5, 5));
 
 		b0 = createSimpleButton("Cancel");
-		b1 = createSimpleButton("Step 1.");
-		b2 = createSimpleButton("Step 2.");
-		b3 = createSimpleButton("Step 3.");
+		b1 = createSimpleButton("Student Information");
+		b2 = createSimpleButton("Car Information");
+		b3 = createSimpleButton("PIN Number");
 		b4 = createSimpleButton("Complete");
 
 		b0.setActionCommand("Cancel");
 		b1.setActionCommand("Student_Information");
 		b2.setActionCommand("Car_Information");
-		b3.setActionCommand("Choose_Password");
+		b3.setActionCommand("Enter_PIN");
 		b4.setActionCommand("complete");
 
 		b0.addActionListener(this);	
@@ -219,27 +220,28 @@ public JPanel sidePanelView() {
 
 	//action listener for views
 	public void actionPerformed(ActionEvent e) {
-		//if the user initially logs in, this is theaction taken to validate their info
-		if (e.getActionCommand() == "login_authenticate") {
+		String cmd = e.getActionCommand();
+		//if the user initially logs in, this is the action taken to validate their info
+		if (cmd == "login_authenticate") {
 			//reset the current step they are on. we know they are on this view, so theres no way for them to get to it without bing on step 1
 			current_step = 1;
 			try {
-				//get all the textfields from login page (their student number and password)
+				//get all the textfields from login page (their student number and PIN)
 				ArrayList<JTextField> fields = getAllComponents(this.panel);
 
-				String studentnumber = fields.get(0).getText();
-				String password = fields.get(1).getText();
+				studentNumber = fields.get(0).getText();
+				studentPIN = fields.get(1).getText();
 
 				//checks if the student is already in the database, and if so takes them to purchase view.
-				if (sdb.authorizeStudent(Integer.parseInt(studentnumber), Integer.parseInt(password))) {
-					initPurchaseView();
+				if (sdb.authorizeStudent(Integer.parseInt(studentNumber), Integer.parseInt(studentPIN))) {
+					initConfirmationView();
 				}
 
 			} catch (Exception exception) {
 				initErrorView(); //if the student is not found or entered invalid information
 			}
 		}
-		else if (e.getActionCommand() == "Car_Information") {	
+		else if (cmd == "Car_Information") {	
 			//we know the view prior this one was the student view, so we must collect the information
 			if (current_step == 1) {
 				getStudentInfo();
@@ -247,13 +249,13 @@ public JPanel sidePanelView() {
 			}
 		}
 		//this is the initial view after clicking new client, so there is no information to view, just return the view. 
-		else if (e.getActionCommand() == "Student_Information") {
+		else if (cmd == "Student_Information") {
 			if (current_step == 1) {
 				initCustomerInfoPage();
 			}
 		}
 		//we know the prior view was the car info page, so we must first collect all that information
-		else if (e.getActionCommand() == "Choose_Password") {
+		else if (cmd == "Enter_PIN") {
 			if (current_step == 2) {
 				ArrayList<JComboBox> fields = getGroupComponents(this.panel);
 				ArrayList<JTextField> otherfields = getAllComponents(this.panel);
@@ -268,11 +270,41 @@ public JPanel sidePanelView() {
 			}
 				
 		}
-		else if (e.getActionCommand() == "Purchase_confirm") { 
-			//this is where you validate and call the receipt.
+		// Confirmed payment, display receipt permit.
+		else if (cmd == "Confirm") { 
+		    int sn = Integer.parseInt(studentNumber);
+		    Student s = sdb.getStudent(sn);
+            //
+            // Try to get a parking spot
+		    String spot = pdb.getAvailableSpot();
+		    if (spot.equals(""))
+		        initErrorView();
+
+		    // Save the spot in the student database and change status
+		    try {
+		        sdb.saveParkingSpot(sn, spot, pdb);
+                ReceiptFrame frame = new ReceiptFrame(s, true);     
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setTitle("Kiosk Permit");
+                frame.setPreferredSize(new Dimension(800, 400));
+                frame.pack();
+                frame.setVisible(true);
+                initLoginPage();
+
+		    } catch (IOException ioe) {
+                initErrorView();
+		    }
+
+		    /* ReceiptFrame frame = new ReceiptFrame(s, true); 	 */
+		    /* frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); */
+		    /* frame.setTitle("Kiosk Permit"); */
+		    /* frame.setPreferredSize(new Dimension(800, 400)); */
+		    /* frame.pack(); */
+		    /* frame.setVisible(true); */
+		    /* initLoginPage(); */
 		}
 		//final button on new client form
-		else if (e.getActionCommand() == "complete") {
+		else if (cmd == "complete") {
 			//ensure they are on this step.
 			if (current_step==3) {
 				current_step=1;
@@ -293,35 +325,29 @@ public JPanel sidePanelView() {
 			}
 		}
 		//if the user decides to leave the form for new client signup
-		else if (e.getActionCommand() == "Cancel") {
+		else if (cmd == "Cancel") {
 			initLoginPage();
 			current_step = 1;
 		}
 		//collect all the information from initPurchaseView()
-		else if (e.getActionCommand() == "Purchase") {
-			ArrayList<JComboBox> purchaseFields = getGroupComponents(this.panel);
-	
-			purchaseMonth 	= String.valueOf(purchaseFields.get(0).getSelectedItem());
-			purchaseDay 	= String.valueOf(purchaseFields.get(1).getSelectedItem());
-			purchaseYear 	= String.valueOf(purchaseFields.get(2).getSelectedItem());
-			purchaseHour 	= String.valueOf(purchaseFields.get(3).getSelectedItem());
-			purchaseMinute = String.valueOf(purchaseFields.get(4).getSelectedItem());
-			purchaseAMPM 	= String.valueOf(purchaseFields.get(5).getSelectedItem());
-			
+		else if (cmd == "Purchase") {
 			//take them to the confirmation view page
 			initConfirmationView();
 		}
 		//every other action must be a keyboard input, so validate that,
 		else {
-			switch(e.getActionCommand()) {
-				case 	"Space": 	Global.selectedTextField.setText(Global.selectedTextField.getText() + " ");
-										break;
-				case	"Back":		if (Global.selectedTextField.getText().length() > 0) {
-    										Global.selectedTextField.setText(Global.selectedTextField.getText().substring(0, Global.selectedTextField.getText().length()-1));
-  										}
-  										break;
-				default:				Global.selectedTextField.setText(Global.selectedTextField.getText() + e.getActionCommand());
-										break;
+			switch(cmd) {
+				case 	"Space": 	
+				    Global.selectedTextField.setText(Global.selectedTextField.getText() + " ");
+					break;
+				case	"Back":		
+				    if (Global.selectedTextField.getText().length() > 0) {
+    				    Global.selectedTextField.setText(Global.selectedTextField.getText().substring(0, Global.selectedTextField.getText().length()-1));
+  					}
+  					break;
+				default:				
+				    Global.selectedTextField.setText(Global.selectedTextField.getText() + cmd);
+					break;
 			}
 		}
 		this.setContentPane(panel);
@@ -343,17 +369,17 @@ public JPanel sidePanelView() {
 		studentNumberField.addMouseListener(this);
 
 		mainPane.add(new JLabel("First Name:", JLabel.CENTER));
-      mainPane.add(firstNameField);
-      mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-      mainPane.add(new JLabel("Last Name:", JLabel.CENTER));
-      mainPane.add(lastNameField);
-      mainPane.add(Box.createHorizontalStrut(15)); // a spacer
+        mainPane.add(firstNameField);
+        mainPane.add(Box.createHorizontalStrut(15)); // a spacer
+        mainPane.add(new JLabel("Last Name:", JLabel.CENTER));
+        mainPane.add(lastNameField);
+        mainPane.add(Box.createHorizontalStrut(15)); // a spacer
 		mainPane.add(new JLabel("Student Number:", JLabel.CENTER));
-      mainPane.add(studentNumberField);      
+        mainPane.add(studentNumberField);      
 
-      mainPane.setLayout(new GridLayout(10,1));
-      mainPane.setBackground(Global.mainBackground);
-      mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
+        mainPane.setLayout(new GridLayout(10,1));
+        mainPane.setBackground(Global.mainBackground);
+        mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
 		return mainPane;
 	}
 
@@ -370,34 +396,34 @@ public JPanel sidePanelView() {
 
 		JLabel welcomeBanner = new JLabel("Welcome", JLabel.CENTER);
 		JLabel studentNumberLabel = new JLabel("Student Number:", JLabel.CENTER);
-		JLabel passwordLabel = new JLabel("Password:", JLabel.CENTER);
+		JLabel pinLabel = new JLabel("PIN Number:", JLabel.CENTER);
 
 		welcomeBanner.setFont(Global.titleFont);
 		studentNumberLabel.setFont(Global.labelFont);
-		passwordLabel.setFont(Global.labelFont);
+		pinLabel.setFont(Global.labelFont);
 
 		mainPane.add(welcomeBanner);
 		mainPane.add(Box.createHorizontalStrut(15)); // a spacer
 		//adding the componenets
 
 		mainPane.add(studentNumberLabel);
-      mainPane.add(studentNumberField);
+        mainPane.add(studentNumberField);
 
-      mainPane.add(Box.createHorizontalStrut(15)); // a spacer
+        mainPane.add(Box.createHorizontalStrut(15)); // a spacer
 
-      mainPane.add(passwordLabel);
-      mainPane.add(passwordField);
+        mainPane.add(pinLabel);
+        mainPane.add(passwordField);
 
-      mainPane.add(Box.createVerticalStrut(5)); // a spacer
+        mainPane.add(Box.createVerticalStrut(5)); // a spacer
 
-    	mainPane.add(loginButtonView());
+        mainPane.add(loginButtonView());
 
-      mainPane.setLayout(new GridLayout(10,1));
-      mainPane.setBackground(Global.mainBackground);
-      mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ));
+        mainPane.setLayout(new GridLayout(10,1));
+        mainPane.setBackground(Global.mainBackground);
+        mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ));
 
       //studentNumberField.getText();
-      return mainPane;
+        return mainPane;
 	}
 
 	//sets up the buttons on the main page
@@ -446,17 +472,17 @@ public JPanel sidePanelView() {
 		licensePlateField.addMouseListener(this);
 
 		mainPane.add(new JLabel("License Plate Number:", JLabel.CENTER));
-      mainPane.add(licensePlateField);
-      mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-      mainPane.add(new JLabel("Car Model:", JLabel.CENTER));
-      mainPane.add(carModelField);
-      mainPane.add(new JLabel("Insurance Company:", JLabel.CENTER));
-      mainPane.add(insuranceChoice);
+        mainPane.add(licensePlateField);
+        mainPane.add(Box.createHorizontalStrut(15)); // a spacer
+        mainPane.add(new JLabel("Car Model:", JLabel.CENTER));
+        mainPane.add(carModelField);
+        mainPane.add(new JLabel("Insurance Company:", JLabel.CENTER));
+        mainPane.add(insuranceChoice);
 
 
-      mainPane.setLayout(new GridLayout(10,1));
-      mainPane.setBackground(Global.mainBackground);
-      mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
+        mainPane.setLayout(new GridLayout(10,1));
+        mainPane.setBackground(Global.mainBackground);
+        mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
 		return mainPane;
 	}
 
@@ -523,7 +549,7 @@ public JPanel sidePanelView() {
 		mainPane.add(minuteList);
 		mainPane.add(ampmList);
 		
-		mainPane.add(new JLabel("Parking Rate 25cents / hour:", JLabel.CENTER));
+		mainPane.add(new JLabel("Parking Rate $3.50 / day", JLabel.CENTER));
 		mainPane.add(mainPurchasebuttons());
 		mainPane.setLayout(new GridLayout(10,1));
 		return mainPane;
@@ -564,37 +590,44 @@ public JPanel sidePanelView() {
 		secondPassField.addMouseListener(this);
 
 		mainPane.add(new JLabel("Enter Desired Password:", JLabel.CENTER));
-      mainPane.add(firstPassField);
-      mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-      mainPane.add(new JLabel("Confirm Password", JLabel.CENTER));
-      mainPane.add(secondPassField);
+        mainPane.add(firstPassField);
+        mainPane.add(Box.createHorizontalStrut(15)); // a spacer
+        mainPane.add(new JLabel("Confirm Password", JLabel.CENTER));
+        mainPane.add(secondPassField);
 
-      mainPane.setLayout(new GridLayout(10,1));
-      mainPane.setBackground(Global.mainBackground);
-      mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
+        mainPane.setLayout(new GridLayout(10,1));
+        mainPane.setBackground(Global.mainBackground);
+        mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
 		return mainPane;
 	}
 
 	//after the purchase page, this is where the user confirms his ticket information
 	public JPanel mainConfirmationView() {
 		JPanel mainPane = new JPanel();
+		JLabel chargeLabel = new JLabel(); 
 
-		mainPane.add(new JLabel(purchaseMonth, JLabel.CENTER));
-		mainPane.add(new JLabel(purchaseDay, JLabel.CENTER));
-		mainPane.add(new JLabel(purchaseYear, JLabel.CENTER));
-		mainPane.add(new JLabel(purchaseHour, JLabel.CENTER));
-		mainPane.add(new JLabel(purchaseMinute, JLabel.CENTER));
-		mainPane.add(new JLabel(purchaseAMPM, JLabel.CENTER));
+		chargeLabel.setFont(Global.formFont);
+		chargeLabel.setText("The charge is $3.50 / day. Please confirm payment");
+        chargeLabel.setHorizontalAlignment(JLabel.CENTER);
 
-		mainPane.add(new JLabel("do you accept these charges?", JLabel.CENTER));
-		JButton ok = createSimpleButton("Purchase_confirm");
+		JButton ok = createSimpleButton("Confirm");
+		JButton cancel = createSimpleButton("Cancel");
 		ok.addActionListener(this);	
-		ok.setActionCommand("Cancel");
+		cancel.addActionListener(this);
 
+		// Set button properties
 		ok.setFont(Global.buttonFont);
 		ok.setBorder( new EmptyBorder( 10, 10, 10, 10 ) );
 		ok.setBackground(new Color (34, 139, 34));
+
+        cancel.setFont(Global.buttonFont);
+        cancel.setBorder( new EmptyBorder( 10, 10, 10, 10) );
+        cancel.setBackground(new Color (200, 0, 0));
+
+		mainPane.setLayout(new GridLayout(8, 1, 1, 0));
+		mainPane.add(chargeLabel);
 		mainPane.add(ok);
+		mainPane.add(cancel);
 		return mainPane;
 	}
 

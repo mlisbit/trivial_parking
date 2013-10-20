@@ -5,7 +5,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.text.*;
 
-public class RecieptFrame extends JFrame implements ActionListener {
+public class ReceiptFrame extends JFrame implements ActionListener {
     private boolean ok;
 
     private String firstName;
@@ -13,6 +13,7 @@ public class RecieptFrame extends JFrame implements ActionListener {
 
     private JTextPane pane;
     private JPanel panel;
+    private JButton exitButton;
 
     private String face;
     private int size;
@@ -23,12 +24,12 @@ public class RecieptFrame extends JFrame implements ActionListener {
     /* whether they were permitted to park. Then displays */
     /* permit information based on decision and student */
     /* information. */
-    public RecieptFrame(Student s, boolean isAccepted) {
+    public ReceiptFrame(Student s, boolean isAccepted) {
 
         // set required vars for output
-        System.out.println(s);
+        int gap = 15;
         face = "Times New Roman";
-        size = 24;
+        size = 20;
         style = Font.PLAIN;
 
         panel = new JPanel();
@@ -39,50 +40,72 @@ public class RecieptFrame extends JFrame implements ActionListener {
         font = new Font(face, style, size);
         pane.setFont(font);
         pane.setContentType("text/html");
-        /* pane.setText(DisplayAcceptedText(font)); */
-        pane.setText(DisplayText(isAccepted, font));
+
+        /* This will display the appropriate information */
+        /* based on whether the permit is accepted or not. */
+        pane.setText(DisplayText(s, isAccepted, font));
 
         panel.setLayout(new BorderLayout());
-        panel.add(pane);
+        panel.setBorder(BorderFactory.createEmptyBorder(gap, gap, gap, gap));
+
+
+        exitButton = new JButton("OK");
+        exitButton.addActionListener(this);
+        exitButton.setFont(font);
+        exitButton.setBounds(80, 80, 80, 80);
+
+        panel.add(pane, BorderLayout.CENTER);
+        panel.add(exitButton, BorderLayout.SOUTH);
         this.setContentPane(panel);
 
     }
     
     /* Displays if the kiosk determines the records are valid */
-    private static String DisplayAcceptedText(Font f) {
+    private static String DisplayAcceptedText(Student s, Font f) {
 
         String date = new Date().toString();
         return   ("<html><center><font face=\""+f.getFamily() + "\" size=\"" 
                 + f.getSize() + "\"> Accepted"
-                + "<br> Add the Stuff here " 
                 + "<br>Issued on " + date
+                + "<br>Student Name: " + s.getFullName()
+                + "<br>Student Number: " + s.getStudentNumber()
+                + "<br>Parking spot: " + s.getParkingSpot()
                 + " </font></center></html>"
                 );
 
     }
 
     /* Displays if the kiosk determines the records are invalid */
-    private static String DisplayDeniedText(Font f) {
+    private static String DisplayDeniedText(Student s, Font f) {
 
         String date = new Date().toString();
         return   ("<html><center><font face=\""+f.getFamily() + "\" size=\"" 
                 + f.getSize() + "\"> Denied"
-                + "<br> Add the Stuff here " 
                 + "<br>Issued on " + date
+                + "<br> No parking spaces available"
+                + "<br> Please try again later."
                 + " </font><center></html>"
                 );
 
     }
 
     /* Abstracts the Displays text methods with a boolean value */
-    private static String DisplayText(boolean b, Font f) {
+    private static String DisplayText(Student s, boolean b, Font f) {
         if (b)
-            return DisplayAcceptedText(f);
+            return DisplayAcceptedText(s, f);
         else
-            return DisplayDeniedText(f);
+            return DisplayDeniedText(s, f);
     }
 
 
 	@Override
-	public void actionPerformed(ActionEvent ae) { }
+	public void actionPerformed(ActionEvent ae) {
+        Object src = ae.getSource();	
+        if (src == exitButton) {
+            this.setVisible(false);
+            this.dispose();
+        }
+            
+	}
+
 }
