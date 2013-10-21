@@ -1,4 +1,4 @@
-1a01,open
+1a01,reserved
 1a02,open
 1a03,reserved
 1a04,reserved

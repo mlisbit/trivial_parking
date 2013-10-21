@@ -301,19 +301,13 @@ public JPanel sidePanelView() {
 			//ensure they are on this step.
 			ArrayList<JTextField> passFields = getAllComponents(this.panel);
 
-			if (passFields.get(0).getText().equals(passFields.get(1).getText())) {
+			if ((passFields.get(0).getText().equals(passFields.get(1).getText())) && !(passFields.get(0).getText() == null && (passFields.get(0).getText().isEmpty()))) {
 				studentPassword = passFields.get(0).getText();
 				if (current_step==3) {
 					current_step=1;
 					try {
 						//collect all the information from the form and validate it 
 						if (!(studentNumber == null && studentNumber.isEmpty()) && !(studentPolicyNumber == null && studentPolicyNumber.isEmpty())) {
-							System.out.println("Garbage");
-							System.out.println(studentNumber);
-							System.out.println(studentPassword);
-							System.out.println(studentLastName);
-							System.out.println(studentFirstName);
-
 							if (sdb.saveStudent(Integer.parseInt(studentNumber), Integer.parseInt(studentPassword), studentLastName, studentFirstName)) {
 								sdb.saveInsuranceCompany(Integer.parseInt(studentNumber), studentCarInsurance, Integer.parseInt(studentPolicyNumber), studentCarModel);
 								//sdb.saveCarModel(studentCarModel);
