@@ -1,6 +1,6 @@
 cse13195, 210352698, Luna, Dominique
 cse13181, 207937469, Anderson, Devon
-cse13195, 211704558, Lis, Maciej        
+cse13188, 211704558, Lis, Maciej        
 
 Also I think we need to change the name of KioskMain.java to a1.java
 to make them happy
