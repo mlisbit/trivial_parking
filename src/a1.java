@@ -34,7 +34,7 @@ class KioskMainFrame extends JFrame implements ActionListener, MouseListener {
 	int current_step = 1;
 
 	//save gathered new signup information from form in strings.
-	String studentNumber, studentFirstName, studentLastName, studentCarLicense, studentCarModel, studentCarInsurance, studentPassword, studentPIN;
+	String studentNumber, studentFirstName, studentLastName, studentCarLicense, studentCarModel, studentCarInsurance, studentPassword, studentPIN, studentPolicyNumber;
 	//save gathered ticket information entered. 
 	String purchaseHour, purchaseAMPM, purchaseMinute, purchaseYear, purchaseMonth, purchaseDay;
 
@@ -262,6 +262,7 @@ public JPanel sidePanelView() {
 
 				studentCarModel = otherfields.get(0).getText();
 				studentCarLicense = otherfields.get(1).getText();
+				studentPolicyNumber = otherfields.get(2).getText();
 				studentCarInsurance = String.valueOf(fields.get(0).getSelectedItem());
 				
 				//move on to the final step
@@ -298,23 +299,34 @@ public JPanel sidePanelView() {
 		//final button on new client form
 		else if (cmd == "complete") {
 			//ensure they are on this step.
-			if (current_step==3) {
-				current_step=1;
+			ArrayList<JTextField> passFields = getAllComponents(this.panel);
+
+			if (passFields.get(0).getText().equals(passFields.get(1).getText())) {
+				studentPassword = passFields.get(0).getText();
+				if (current_step==3) {
+					current_step=1;
+					try {
+						//collect all the information from the form and validate it 
+						if (!(studentNumber == null && studentNumber.isEmpty()) && !(studentPolicyNumber == null && studentPolicyNumber.isEmpty())) {
+							System.out.println("Garbage");
+							System.out.println(studentNumber);
+							System.out.println(studentPassword);
+							System.out.println(studentLastName);
+							System.out.println(studentFirstName);
+
+							if (sdb.saveStudent(Integer.parseInt(studentNumber), Integer.parseInt(studentPassword), studentLastName, studentFirstName)) {
+								sdb.saveInsuranceCompany(Integer.parseInt(studentNumber), studentCarInsurance, Integer.parseInt(studentPolicyNumber), studentCarModel);
+								//sdb.saveCarModel(studentCarModel);
+								initLoginPage();
+							} 
+							else { initErrorView(); }
+						} //main if
+					} catch (IOException exception) { initErrorView(); }
+				}				
+
+			}
+			System.out.println(current_step);
 			
-				try {
-				//collect all the information from the form and validate it 
-				if(studentNumber == null && studentNumber.isEmpty()) {
-					if (sdb.saveStudent(Integer.parseInt(studentNumber), Integer.parseInt(studentPassword), studentLastName, studentFirstName))
-						sdb.saveInsuranceCompany(Integer.parseInt(studentNumber), studentCarInsurance, Integer.parseInt(studentCarLicense), studentCarModel);
-						//sdb.saveCarModel(studentCarModel);
-						initLoginPage();
-					}
-					else 
-						initErrorView();
-				} catch (IOException exception) {
-				initErrorView();
-			}
-			}
 		}
 		//if the user decides to leave the form for new client signup
 		else if (cmd == "Cancel") {
@@ -360,13 +372,21 @@ public JPanel sidePanelView() {
 		studentNumberField.setFont(Global.formFont);
 		studentNumberField.addMouseListener(this);
 
-		mainPane.add(new JLabel("First Name:", JLabel.CENTER));
+		JLabel label1 = new JLabel("First Name:", JLabel.CENTER);
+		JLabel label2 = new JLabel("Last Name:", JLabel.CENTER);
+		JLabel label3 = new JLabel("Student Number:", JLabel.CENTER);
+
+		label1.setFont(Global.labelFont);
+		label2.setFont(Global.labelFont);
+		label3.setFont(Global.labelFont);
+
+		mainPane.add(label1);
         mainPane.add(firstNameField);
         mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-        mainPane.add(new JLabel("Last Name:", JLabel.CENTER));
+      mainPane.add(label2);
         mainPane.add(lastNameField);
         mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-		mainPane.add(new JLabel("Student Number:", JLabel.CENTER));
+		mainPane.add(label3);
         mainPane.add(studentNumberField);      
 
         mainPane.setLayout(new GridLayout(10,1));
@@ -449,7 +469,9 @@ public JPanel sidePanelView() {
 		
 		JTextField carModelField = new JTextField("",20);
 		JTextField licensePlateField = new JTextField("",20);
+
 		JComboBox insuranceChoice;
+		JTextField policyNumber = new JTextField("",20);
 
 		String [] insuranceCompanies = new String[idb.getCompanies().size()];
 		
@@ -462,19 +484,33 @@ public JPanel sidePanelView() {
 		carModelField.addMouseListener(this);
 		licensePlateField.setFont(Global.formFont);
 		licensePlateField.addMouseListener(this);
+		policyNumber.setFont(Global.formFont);
+		policyNumber.addMouseListener(this);
+		
+		JLabel label1 = new JLabel("License Plate Number:", JLabel.CENTER);
+		JLabel label2 = new JLabel("Car Model:", JLabel.CENTER);
+		JLabel label3 = new JLabel("Insurance Company:", JLabel.CENTER);
+		JLabel label4 = new JLabel("Policy Number:", JLabel.CENTER);
 
-		mainPane.add(new JLabel("License Plate Number:", JLabel.CENTER));
-        mainPane.add(licensePlateField);
-        mainPane.add(Box.createHorizontalStrut(15)); // a spacer
-        mainPane.add(new JLabel("Car Model:", JLabel.CENTER));
-        mainPane.add(carModelField);
-        mainPane.add(new JLabel("Insurance Company:", JLabel.CENTER));
-        mainPane.add(insuranceChoice);
+		label1.setFont(Global.labelFont);
+		label2.setFont(Global.labelFont);
+		label3.setFont(Global.labelFont);
+		label4.setFont(Global.labelFont);
+
+		mainPane.add(label1);
+      mainPane.add(licensePlateField);
+      mainPane.add(label2);
+      mainPane.add(carModelField);
+      mainPane.add(Box.createHorizontalStrut(15)); // a spacer
+      mainPane.add(label3);
+      mainPane.add(insuranceChoice);
+      mainPane.add(label4);
+      mainPane.add(policyNumber);
 
 
-        mainPane.setLayout(new GridLayout(10,1));
-        mainPane.setBackground(Global.mainBackground);
-        mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
+      mainPane.setLayout(new GridLayout(10,1));
+      mainPane.setBackground(Global.mainBackground);
+      mainPane.setBorder( new EmptyBorder( 80, 80, 50, 80 ) );
 		return mainPane;
 	}
 
